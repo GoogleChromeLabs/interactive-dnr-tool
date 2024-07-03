@@ -27,7 +27,7 @@ manifestFileInput.addEventListener('change', (event) => {
         reader.onload = function(e) {
             try {
                 const manifestObject = JSON.parse(e.target.result);
-                let manifestValidationResult = isValidManifest(manifestObject);
+                let manifestValidationResult = isValidManifest(manifestObject); // true if no errors, error object otherwise
                 if(manifestValidationResult === true){ // if manifestValidationResult is true, i.e., there are no errors
                     displayRulesetFilePaths(manifestObject);
                 } else {
@@ -36,7 +36,7 @@ manifestFileInput.addEventListener('change', (event) => {
                     let output = "Issues found:\n";
 
                     for (let i = 0; i < manifestValidationResult['type'].length; i++) {
-                        if (mmanifestValidationResult['type'][i] === 'missingFields') {
+                        if (manifestValidationResult['type'][i] === 'missingFields') {
                             let missingFields = manifestValidationResult['missingFields'].join(', ');
                             output += `- Missing fields: ${missingFields}\n`;
                         }
