@@ -181,21 +181,6 @@ function isValidManifest(manifest) {
                 }
             }
         }
-
-        /*if(manifest.hasOwnProperty(field) && (otherFieldsAndTypes[field] !== "array") && (typeof manifest[field] !== otherFieldsAndTypes[field])){
-            syntaxError.isError = true;
-            if(!syntaxError['type'].includes('invalidValueTypes')){
-                syntaxError['type'].push('invalidValueTypes');
-            }
-            syntaxError['invalidValueTypes'].push(field);
-        }
-        if(manifest.hasOwnProperty(field) && (otherFieldsAndTypes[field] === "array") && !Array.isArray(manifest[field])){
-            syntaxError.isError = true;
-            if(!syntaxError['type'].includes('invalidValueTypes')){
-                syntaxError['type'].push('invalidValueTypes');
-            }
-            syntaxError['invalidValueTypes'].push(field);
-        }*/
     }
 
     if(syntaxError.isError == true){
