@@ -76,14 +76,11 @@ function isValidManifest(manifest) {
     let syntaxError = {};
     syntaxError['type'] = [];
 
-    // Check for declarativeNetRequest permission
-    if(!manifest.permissions.includes('declarativeNetRequest')){
+    // Check for declarativeNetRequest and declarativeNetRequestWithHostAccess permissions
+    if(!manifest.permissions.includes('declarativeNetRequest') && !manifest.permissions.includes('declarativeNetRequestWithHostAccess')){
         syntaxError.isError = true;
         syntaxError['type'].push('missingPermissions');
     }
-
-    // TODO: Check for declarativeNetRequestFeedback permission if debug-only features used
-    
 
     // Check for required fields
     const requiredFieldsAndTypes = { // "description" and "icon" required for uploading to web store
@@ -96,7 +93,7 @@ function isValidManifest(manifest) {
             syntaxError.isError = true;
             syntaxError['type'].push('missingFields');
             syntaxError['missingFields'] = [];
-            syntaxError['missingFields'].push(requiredFields[i]);
+            syntaxError['missingFields'].push(field);
         } else if(manifest.hasOwnProperty(field) && (typeof manifest[field] !== requiredFieldsAndTypes[field])){
             syntaxError.isError = true;
             if(!syntaxError['type'].includes('invalidValueTypes')){
@@ -159,7 +156,6 @@ function isValidManifest(manifest) {
     };
     
     for(let field of Object.keys(otherFieldsAndTypes)){
-
         if(manifest.hasOwnProperty(field)){
             if(otherFieldsAndTypes[field] === "array"){
                 if(!Array.isArray(manifest[field])){
