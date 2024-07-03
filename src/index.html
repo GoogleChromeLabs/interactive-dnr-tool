@@ -17,39 +17,8 @@ limitations under the License. -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UrlFilterParser</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    input {
-      margin-bottom: 10px;
-      padding: 5px;
-      font-size: 16px;
-    }
-    pre {
-      background: #f4f4f4;
-      padding: 10px;
-      border: 1px solid #ddd;
-      width: 1000px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      background-color: #007bff;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .fileInfo {
-      margin-top: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <title>Interactive DNR Tool</title>
 </head>
 <body>
 
@@ -83,28 +52,26 @@ limitations under the License. -->
     <button type="submit" id="RequestTestButton">Test Request</button>
   </form>
   <br />
-  <label for="RequestOutput"><i>Request Object: </i></label>
+  <h4>Request Output</h4>
   <pre id="RequestOutput"></pre>
-  <label for="RequestTestOutput"><i>Request Test Output: </i></label>
+  <h4>Request Test Output</h4>
   <pre id="RequestTestOutput"></pre>
 
   <hr>
+  
   <h1>Rules Input and Verification</h1>
   <h2>Manifest File Input</h2>
   <input type="file" id="manifestFileInput"/>
   <label for="manifestFileInput" class="custom-file-upload">choose manifest file</label>
   <div class="fileInfo" id="manifestFileInfo">
-    <!-- Will contain info for uploaded manifest file -->
   </div>
   <h2>Rule Files Input</h2>
   <input type="file" id="ruleFilesInput" multiple/>
   <label for="ruleFilesInput" class="custom-file-upload">choose all rules files</label>
   <div class="fileInfo" id="ruleFilesInfo">
-    <!-- Will contain list of divs with id 'fileInfo' for each ruleset file to be displayed -->
   </div>
-  <script type="module" src="./urlFilterParser.js"></script>
-  <script type="module" src="./manifest.js"></script>
-  <script type="module" src="./rules.js"></script>
-  <!--<script type="module" src="./script.js"></script>-->
+  <script type="module" src="./scripts/urlFilterParser.js"></script>
+  <script type="module" src="./scripts/manifest.js"></script>
+  <script type="module" src="./scripts/rules.js"></script>
 </body>
 </html>

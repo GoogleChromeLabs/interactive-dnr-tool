@@ -19,21 +19,21 @@
 import { urlFilterParse, urlMatcher } from './urlFilterParser.js';
 import { rulesetFilePaths } from './manifest.js';
 
-// Each object in this list has the following signature
-// {
-//    rule: {
-//        the rule itself
-//    }
-//    urlParserIndexedRule: {
-//        anchorLeft: 'BOUNDARY' | 'SUBDOMAIN' | 'NONE',
-//        urlPatternType: 'SUBSTRING' | 'WILDCARDED',
-//        urlPattern: 'abc*def',
-//        anchorRight: 'BOUNDARY' | 'NONE'
-//        },
-//    ruleId: 1 | 2 | ... ,
-//    rulesetId: 1 | 2 | ...,
-//    ruleEnabled: true | false
-// }
+/* Each object in this list has the following signature
+   {
+      rule: {
+          the rule itself
+      }
+      urlParserIndexedRule: {
+          anchorLeft: 'BOUNDARY' | 'SUBDOMAIN' | 'NONE',
+          urlPatternType: 'SUBSTRING' | 'WILDCARDED',
+          urlPattern: 'abc*def',
+          anchorRight: 'BOUNDARY' | 'NONE'
+          },
+      ruleId: 1 | 2 | ... ,
+      rulesetId: 1 | 2 | ...,
+      ruleEnabled: true | false
+   }*/
 let parsedRulesList = [];
 
 let request = {}; // Will be assigned with request created in the request matching tester
@@ -65,17 +65,13 @@ filesInput.addEventListener('change', (event) => {
                     } else {
                         document.getElementById('ruleFilesInfo').textContent = `Invalid ruleset with id: ${rulesetObject.rulesetId}`;
                     } 
-                    // console.log(ruleObject); correct
                 } catch(error){
                     console.log("Error parsing rule files: ", error);
                     document.getElementById('ruleFilesInfo').textContent = 'Error parsing rule file';
                 }
             }
             reader.readAsText(file);            
-            // console.log(file); correct
-            // console.log(indexedRulesList); // correct
         }        
-        // console.log(files); correct        
     }
 });
 
@@ -154,7 +150,6 @@ function isValidURLFilter(urlFilterString) {
 // Checks validity of rule, including checking validity of its condition, i.e., the URLFilter string
 function isValidRule(rule){
     let isValid = true;
-    // console.log(rule); // correct
     if(!rule.id || (rule.id && !Number.isInteger(rule.id))){
         isValid = false;
         console.log('id');
@@ -173,10 +168,7 @@ function isValidRule(rule){
     }
     if(!isValidURLFilter(rule.condition.urlFilter)){
         isValid = false;
-        // console.log('urlFilter'); // correct
-        // console.log(rule.condition.urlFilter + " - " + isValidURLFilter(rule.condition.urlFilter)); // correct
     }
-    // console.log(rule.condition.urlFilter + " - " + isValidURLFilter(rule.condition.urlFilter)); // correct
     return isValid;
 }
 
@@ -208,9 +200,8 @@ document.getElementById("RequestTestForm").addEventListener('submit', (event) =>
         }
         formObject[key] = value;
     });
-    const output = document.getElementById("RequestOutput"); // output the request and show it as an object
+    const output = document.getElementById("RequestOutput");
     output.textContent = JSON.stringify(formObject, null, 2);
-    // console.log('Form data: ' + JSON.stringify(formObject)); // correct
     request = formObject;
     if(parsedRulesList.length !== 0){
         requestMatcher();
@@ -219,27 +210,21 @@ document.getElementById("RequestTestForm").addEventListener('submit', (event) =>
     }
 });
 
-// Check which (one or multiple) of the rules in parsedRulesList matches with request
-// Then produce output (to be shown in RequestTestOutput pre) that shows what happened with the request (preferable also as an object)
-// Returns rule that matched with the request
+// Show all rules that matched with the given request
 function requestMatcher(){
+    const output = document.getElementById("RequestTestOutput");
+    let outputTextContent = "";
     let matchedRulesList = [];
     for(let i = 0; i < parsedRulesList.length; i++){
-        const rule = parsedRulesList[i]; // each element is an object with the signature as defined at top of file
-        const output = document.getElementById("RequestTestOutput"); // output the rule that matched as an object
-        let outputTextContent = output.textContent;
-        // console.log(JSON.stringify(rule)); // correct
+        const rule = parsedRulesList[i]; 
         if(urlMatcher(request.httpRequestUrl, rule.urlParserIndexedRule) === true){
-            // console.log("Request matched with rule: ruleset ID: " + rule.rulesetId + ", rule ID: " + rule.ruleId + ", url filter string: " + rule.rule.condition.urlFilter); // correct
-            outputTextContent += JSON.stringify(rule, null, 2);
+            outputTextContent += JSON.stringify(rule, null, 2) + "\n\n";
             matchedRulesList.push(rule);
         }
     }
     output.textContent = outputTextContent;
-    // console.log(parsedRulesList); // correct
     
 }
 
-
-// Export the variables and functions for use in other files
+// TODO: Better state sharing
 export { parsedRulesList, displayRules, isValidRule, isValidURLFilter, isValidRuleset };

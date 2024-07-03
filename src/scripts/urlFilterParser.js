@@ -20,16 +20,17 @@ import { isValidURLFilter } from "./rules.js";
 
 let indexedRuleTest = {}; // Object to store the parsed rule (since only one rule is parsed at a time, this variable is just for testing purposes)
 
-// URLFilterParser: Class for parsing the URLFilter string of a rule, borrows generously from Chromium source code:-
-// https://source.chromium.org/chromium/chromium/src/+/main:extensions/browser/api/declarative_net_request/indexed_rule.cc;l=47
-// Helper class contaning methods to parse the URLFilter string of a rule
-// Returns an object 'indexedRule' with the following signature:-
-// {
-//     anchorLeft: 'BOUNDARY' | 'SUBDOMAIN' | 'NONE',
-//     urlPatternType: 'SUBSTRING' | 'WILDCARDED',
-//     urlPattern: 'abc*def',
-//     anchorRight: 'BOUNDARY' | 'NONE'
-// }
+/* URLFilterParser: Class for parsing the URLFilter string of a rule, borrows generously from Chromium source code:-
+   https://source.chromium.org/chromium/chromium/src/+/main:extensions/browser/api/declarative_net_request/indexed_rule.cc;l=47
+   Helper class contaning methods to parse the URLFilter string of a rule
+   Returns an object 'indexedRule' with the following signature:-
+   {
+       anchorLeft: 'BOUNDARY' | 'SUBDOMAIN' | 'NONE',
+       urlPatternType: 'SUBSTRING' | 'WILDCARDED',
+       urlPattern: 'abc*def',
+       anchorRight: 'BOUNDARY' | 'NONE'
+   }*/
+
 class URLFilterParser {
     constructor(urlFilter, indexedRule) {
         this.urlFilter = urlFilter || '';
@@ -111,10 +112,8 @@ function urlFilterParseDemo() {
 
 // Create indexedRule object for given URLFilter string
 function urlFilterParse(urlFilterString) {
-    // const urlFilter = document.getElementById('urlFilterInput').value;
     let indexedRule = {};
     URLFilterParser.parse(urlFilterString, indexedRule);
-    // document.getElementById('parsedRuleOutput').textContent = JSON.stringify(indexedRule, null, 2);
     return indexedRule;
 }
 
@@ -206,5 +205,5 @@ document.getElementById("UrlTestButton").addEventListener("click", () => {
     outputElement.textContent = urlMatcherOutput;
 });
 
-// Export the class for use in other files
+// TODO: Better state sharing
 export { URLFilterParser, urlFilterParseDemo, urlFilterParse, urlMatcher };

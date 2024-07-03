@@ -27,21 +27,21 @@ manifestFileInput.addEventListener('change', (event) => {
         reader.onload = function(e) {
             try {
                 const manifestObject = JSON.parse(e.target.result);
-                let manifestSyntaxError = isValidManifest(manifestObject);
-                if(manifestSyntaxError === true){ // if manifestSyntaxError is true, i.e., there are no errors
+                let manifestValidationResult = isValidManifest(manifestObject);
+                if(manifestValidationResult === true){ // if manifestValidationResult is true, i.e., there are no errors
                     displayRulesetFilePaths(manifestObject);
                 } else {
                     const fileInfoDiv = document.getElementById('manifestFileInfo');
 
                     let output = "Issues found:\n";
 
-                    for (let i = 0; i < manifestSyntaxError['type'].length; i++) {
-                        if (manifestSyntaxError['type'][i] === 'missingFields') {
-                            let missingFields = manifestSyntaxError['missingFields'].join(', ');
+                    for (let i = 0; i < manifestValidationResult['type'].length; i++) {
+                        if (mmanifestValidationResult['type'][i] === 'missingFields') {
+                            let missingFields = manifestValidationResult['missingFields'].join(', ');
                             output += `- Missing fields: ${missingFields}\n`;
                         }
-                        if (manifestSyntaxError['type'][i] === 'invalidValueTypes') {
-                            let invalidValueTypes = manifestSyntaxError['invalidValueTypes'].join(', ');
+                        if (manifestValidationResult['type'][i] === 'invalidValueTypes') {
+                            let invalidValueTypes = manifestValidationResult['invalidValueTypes'].join(', ');
                             output += `- Invalid value types for: ${invalidValueTypes}\n`;
                         }
                     }
@@ -67,12 +67,11 @@ function displayRulesetFilePaths(manifest){
             output += `- ${ruleset.id}: ${ruleset.path}, Enabled: ${ruleset.enabled}\n`;
             rulesetFilePaths.push({rulesetFilePath: ruleset.path, rulesetId: ruleset.id});
         });
-        // console.log(rulesetFilePaths); // correct
         fileInfo.innerText = output;     
     }       
 }
 
-// Checks syntax and validity of the manifest file
+// Returns true if the manifest is valid, else returns an object with the errors
 function isValidManifest(manifest) {
     let syntaxError = {};
     syntaxError['type'] = [];
@@ -87,22 +86,24 @@ function isValidManifest(manifest) {
     
 
     // Check for required fields
-    const requiredFields = ['name', 'version', 'manifest_version']; // "descripton" and "icon" required for web store
-    const requiredFieldsTypes = ['string', 'string', 'number'];
-    for (let i = 0; i < requiredFields.length; i++) {
-        if (!manifest.hasOwnProperty(requiredFields[i])) {
+    const requiredFieldsAndTypes = { // "description" and "icon" required for uploading to web store
+        "name": "string",
+        "version": "string",
+        "manifest_version": "number",
+    }
+    for (let field of Object.keys(requiredFieldsAndTypes)) {
+        if (!manifest.hasOwnProperty(field)) {
             syntaxError.isError = true;
             syntaxError['type'].push('missingFields');
             syntaxError['missingFields'] = [];
             syntaxError['missingFields'].push(requiredFields[i]);
-        }
-        if(manifest.hasOwnProperty(requiredFields[i]) && (typeof manifest[requiredFields[i]] !== requiredFieldsTypes[i])){
+        } else if(manifest.hasOwnProperty(field) && (typeof manifest[field] !== requiredFieldsAndTypes[field])){
             syntaxError.isError = true;
             if(!syntaxError['type'].includes('invalidValueTypes')){
                 syntaxError['type'].push('invalidValueTypes');
                 syntaxError['invalidValueTypes'] = [];
             }
-            syntaxError['invalidValueTypes'].push(requiredFields[i]);
+            syntaxError['invalidValueTypes'].push(field);
         }
     }
 
@@ -157,31 +158,52 @@ function isValidManifest(manifest) {
         "webview": "object"
     };
     
-    for(let i = 0; i < otherFieldTypes.length; i++){
-        if(manifest.hasOwnProperty(otherFields[i]) && (otherFieldTypes[i] !== "array") && (typeof manifest[otherFields[i]] !== otherFieldTypes[i])){
+    for(let field of Object.keys(otherFieldsAndTypes)){
+
+        if(manifest.hasOwnProperty(field)){
+            if(otherFieldsAndTypes[field] === "array"){
+                if(!Array.isArray(manifest[field])){
+                    syntaxError.isError = true;
+                    if(!syntaxError['type'].includes('invalidValueTypes')){
+                        syntaxError['type'].push('invalidValueTypes');
+                        syntaxError['invalidValueTypes'] = [];
+                    }
+                    syntaxError['invalidValueTypes'].push(field);
+                }
+            } else {
+                if(typeof manifest[field] !== otherFieldsAndTypes[field]){
+                    syntaxError.isError = true;
+                    if(!syntaxError['type'].includes('invalidValueTypes')){
+                        syntaxError['type'].push('invalidValueTypes');
+                        syntaxError['invalidValueTypes'] = [];
+                    }
+                    syntaxError['invalidValueTypes'].push(field);
+                }
+            }
+        }
+
+        /*if(manifest.hasOwnProperty(field) && (otherFieldsAndTypes[field] !== "array") && (typeof manifest[field] !== otherFieldsAndTypes[field])){
             syntaxError.isError = true;
             if(!syntaxError['type'].includes('invalidValueTypes')){
                 syntaxError['type'].push('invalidValueTypes');
             }
-            syntaxError['invalidValueTypes'].push(otherFields[i]);
+            syntaxError['invalidValueTypes'].push(field);
         }
-        if(manifest.hasOwnProperty(otherFields[i]) && (otherFieldTypes[i] === "array") && !Array.isArray(manifest[otherFields[i]])){
+        if(manifest.hasOwnProperty(field) && (otherFieldsAndTypes[field] === "array") && !Array.isArray(manifest[field])){
             syntaxError.isError = true;
             if(!syntaxError['type'].includes('invalidValueTypes')){
                 syntaxError['type'].push('invalidValueTypes');
             }
-            syntaxError['invalidValueTypes'].push(otherFields[i]);
-        }
+            syntaxError['invalidValueTypes'].push(field);
+        }*/
     }
 
     if(syntaxError.isError == true){
-        // console.log("manifest syntax error: "); // correct
-        // console.log(syntaxError); // correct
         return syntaxError;
     } else {
-        // console.log("isValidManifest: true"); // correct
         return true;
     }
 }
 
+// TODO: Better state sharing
 export { rulesetFilePaths, displayRulesetFilePaths, isValidManifest };
