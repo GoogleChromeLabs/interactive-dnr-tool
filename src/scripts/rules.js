@@ -218,12 +218,52 @@ function requestMatcher(){
     for(let i = 0; i < parsedRulesList.length; i++){
         const rule = parsedRulesList[i]; 
         if(urlMatcher(request.httpRequestUrl, rule.urlParserIndexedRule) === true){
-            outputTextContent += JSON.stringify(rule, null, 2) + "\n\n";
             matchedRulesList.push(rule);
+            console.log("Matched rule: ", JSON.stringify(rule, null, 2));
         }
     }
+    let highestPriorityRules = getHighestPriorityRules(matchedRulesList);
+    for(let rule of highestPriorityRules){
+        outputTextContent += JSON.stringify(rule, null, 2) + "\n";
+    }
+    // console.log(outputTextContent);
     output.textContent = outputTextContent;
-    
+}
+
+function getHighestPriorityRules(matchedRulesList){
+    // priority based on priority value
+    const highestPriority = Math.min(...matchedRulesList.map(rule => rule.rule.priority));
+    let highestPriorityRules = matchedRulesList.filter(rule => (rule.rule.priority === highestPriority));
+    if(highestPriorityRules.length === 1){
+        return highestPriorityRules;
+    }
+    // priority based on action type
+    const actionByPriority = ['allow', 'allowAllRequests', 'block', 'upgradeScheme', 'redirect', 'modifyHeaders']; // 'modifyHeaders' dealt with differently
+    const highestPriorityAction = Math.min(...highestPriorityRules.map(rule => actionByPriority.indexOf(rule.rule.action.type)));
+    highestPriorityRules = highestPriorityRules.filter(rule => (rule.rule.action.type === actionByPriority[highestPriorityAction]));
+    // If priority is not block or redirect, and a 'modifyHeaders' rule exists
+    let modifyHeadersRules = matchedRulesList.filter(rule => rule.rule.action.type === 'modifyHeaders');
+    if((actionByPriority[highestPriorityAction] !== 'block' && actionByPriority[highestPriorityAction] !== 'redirect') && modifyHeadersRules.length !== 0){
+        // Check for allow or allowAllRequests rule
+        let allowRules = highestPriorityRules.filter(rule => (rule.rule.action.type === 'allow' || rule.rule.action.type === 'allowAllRequests'));
+        // Find highest priority allow or allowAllRequests rule
+        let highestAllowPriority = -1;
+        let eligibleModifyHeadersRules = [];
+        if(allowRules.length > 0){
+            highestAllowPriority = Math.min(...allowRules.map(rule => rule.rule.priority));
+            // Then find all modifyHeaders rules with the same priority or higher
+            eligibleModifyHeadersRules = modifyHeadersRules.filter(rule => rule.rule.priority <= highestAllowPriority);
+        } else {
+            eligibleModifyHeadersRules = modifyHeadersRules;
+        }
+        // Then find the highest priority modifyHeaders rule based on dev defined priority
+        const highestModifyHeadersPriority = Math.min(...eligibleModifyHeadersRules.map(rule => rule.rule.priority));
+        let highestModifyHeadersRules = eligibleModifyHeadersRules.filter(rule => rule.rule.priority === highestModifyHeadersPriority);
+        // If there is only one highest priority modifyHeaders rule, return it
+        highestPriorityRules = highestModifyHeadersRules;
+        // TODO: If not, check the type of headers modified
+    }
+    return highestPriorityRules;
 }
 
 // TODO: Better state sharing
