@@ -1,31 +1,9 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import LandingDescription from './components/LandingDescription.vue'
+// import LandingDescription from './components/LandingDescription.vue'
 </script>
 
 <template>
-  <header>
-    <img
-      alt="Google Chrome Labs"
-      class="logo"
-      src="@/assets/ChromeLabsLogo.png"
-      width="65"
-      height="65"
-    />
-
-    <div class="wrapper">
-      <LandingDescription />
-
-      <!--The nav below needs to only be on Requests Playground and Rules Editor pages-->
-      <!--
-      <nav>
-        <RouterLink to="/">Requests Playground</RouterLink>
-        <RouterLink to="/about">Rules Editor</RouterLink>
-      </nav>
-      -->
-    </div>
-  </header>
-
   <RouterView />
 </template>
 
