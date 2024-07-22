@@ -9,8 +9,8 @@ import LandingDescription from './components/LandingDescription.vue'
       alt="Google Chrome Labs"
       class="logo"
       src="@/assets/ChromeLabsLogo.png"
-      width="125"
-      height="125"
+      width="65"
+      height="65"
     />
 
     <div class="wrapper">

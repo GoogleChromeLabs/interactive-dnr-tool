@@ -3,14 +3,14 @@
 <template>
   <div class="greetings">
     <h1>Interactive DNR Tool</h1>
-    <h3>Customise and visualise your extension's declarative network rules intuitively.</h3>
+    <h3>Visualise and edit your extension's declarative network rules intuitively.</h3>
   </div>
 </template>
 
 <style scoped>
 h1 {
   font-weight: 500;
-  font-size: 2.6rem;
+  font-size: 2rem;
   position: relative;
   top: -10px;
 }
