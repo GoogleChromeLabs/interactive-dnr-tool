@@ -1,10 +1,19 @@
 <script setup>
-import { computed } from 'vue'
-import { useRulesStore } from '@/stores/rulesStore'
-import LandingDescription from '../components/LandingDescription.vue'
-import ExtensionUploadArea from '../components/ExtensionUploadArea.vue'
-const rulesStore = useRulesStore()
-let filesUploaded = computed(() => rulesStore.rulesetFilesUploaded)
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useRulesStore } from '@/stores/rulesStore';
+import LandingDescription from '../components/LandingDescription.vue';
+import ExtensionUploadArea from '../components/ExtensionUploadArea.vue';
+const rulesStore = useRulesStore();
+let filesUploaded = computed(() => rulesStore.rulesetFilesUploaded);
+
+const router = useRouter();
+
+function goToRequests() {
+  if (filesUploaded.value) {
+    router.push({ name: 'requests' });
+  }
+}
 </script>
 
 <template>
@@ -26,7 +35,7 @@ let filesUploaded = computed(() => rulesStore.rulesetFilesUploaded)
         <ExtensionUploadArea />
       </div>
     </header>
-    <button v-show="filesUploaded">GO!</button>
+    <button v-show="filesUploaded" @click="goToRequests">GO!</button>
   </main>
 </template>
 

@@ -1,17 +1,12 @@
-<script setup>
-import { useRulesStore } from '@/stores/rulesStore';
-const rulesStore = useRulesStore();
-const parsedRulesList = rulesStore.getParsedRulesList;
-console.log(parsedRulesList);
-</script>
+<script setup></script>
 
 <template>
   <main>
-    <h1>Requests Playground</h1>
+    <h1>Rules Editor</h1>
     <div class="wrapper">
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/rules">Rules Editor</RouterLink>
+        <RouterLink to="/requests">Requests Playground</RouterLink>
       </nav>
     </div>
   </main>

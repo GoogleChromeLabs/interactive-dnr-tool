@@ -155,7 +155,7 @@ export const useRulesStore = defineStore('rules', {
     }
     */
     setParsedRulesList(rulesetObject) {
-      rulesetObject.ruleset.forEach((rule) => {
+      rulesetObject.forEach((rule) => {
         const ruleID = rule.id;
         if (this.isValidRule(rule)) {
           let indexedRule = this.urlFilterStore.parseURLFilter(
