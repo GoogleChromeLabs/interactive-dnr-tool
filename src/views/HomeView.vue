@@ -41,12 +41,12 @@ header {
 
 .left-section {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
 }
 
 .logo {
-  margin-bottom: 2rem;
+  margin-right: 2rem;
 }
 
 .wrapper {
@@ -56,16 +56,12 @@ header {
 
 .right-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 @media (min-width: 1024px) {
   header {
     padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   .wrapper {

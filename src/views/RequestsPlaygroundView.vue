@@ -4,13 +4,10 @@
   <main>
     <h1>Hello</h1>
     <div class="wrapper">
-      <!--The nav below needs to only be on Requests Playground and Rules Editor pages-->
-      <!--
       <nav>
-        <RouterLink to="/">Requests Playground</RouterLink>
-        <RouterLink to="/about">Rules Editor</RouterLink>
+        <RouterLink to="/">Home</RouterLink>
+        <!--<RouterLink to="/rules">Rules Editor</RouterLink>-->
       </nav>
-      -->
     </div>
   </main>
 </template>
