@@ -1,14 +1,34 @@
 import { defineStore } from 'pinia';
 import { useURLFilterStore } from './urlFilterStore';
+import { useManifestStore } from './manifestStore';
 import { isValidURLFilter, getHighestPriorityRules } from '@/utils';
 
 // const urlFilterStore = useURLFilterStore()
 
 export const useRulesStore = defineStore('rules', {
   state: () => ({
+    /* Signature of each element of parsedRulesList:
+    {
+      rule: {
+          id: 1,
+          priority: 1,
+          condition: {
+              urlFilter: 'example.com'
+          },
+          action: {
+              type: 'block'
+          }
+      },
+      ruleId: 1,
+      rulesetId: 1,
+      urlParserIndexedRule: {},
+      isEnabled: true | false
+    }
+    */
     parsedRulesList: [],
     rulesetFilesUploaded: false,
-    urlFilterStore: useURLFilterStore()
+    urlFilterStore: useURLFilterStore(),
+    manifestStore: useManifestStore()
   }),
   getters: {
     getParsedRulesList(state) {
@@ -16,6 +36,9 @@ export const useRulesStore = defineStore('rules', {
     }
   },
   actions: {
+    clearParsedRulesList() {
+      this.parsedRulesList = [];
+    },
     setRulesetFilesUploaded(value) {
       this.rulesetFilesUploaded = value;
     },
@@ -66,96 +89,15 @@ export const useRulesStore = defineStore('rules', {
 
       return true;
     },
-    // Test input url against the generated indexedRule object
-    urlMatcher(url, indexedRule) {
-      const urlPattern = indexedRule.urlPattern;
-
-      if (indexedRule.urlPatternType === 'SUBSTRING') {
-        if (!url.includes(urlPattern)) {
-          return false;
-        } else {
-          return true;
+    setParsedRulesList(rulesList, fileName) {
+      let rulesetId = 0;
+      let isEnabled = false;
+      for (let ruleset of this.manifestStore.getRulesetFilePaths)
+        if (ruleset.rulesetFilePath === fileName) {
+          rulesetId = ruleset.rulesetId;
+          isEnabled = ruleset.isEnabled;
         }
-      } else if (indexedRule.urlPatternType === 'WILDCARDED') {
-        let substrings = [];
-        let string = '';
-        for (let i = 0; i < urlPattern.length; i++) {
-          if (
-            urlPattern[i] === '*' ||
-            urlPattern[i] === '^' ||
-            urlPattern[i] === '|'
-          ) {
-            if (string) {
-              substrings.push(string);
-              string = '';
-            }
-          } else {
-            string += urlPattern[i];
-          }
-        }
-        substrings.push(string);
-        let x = 0; // index in urlPattern
-        let index; // index in url where the checking starts
-        if (indexedRule.anchorLeft === 'BOUNDARY') {
-          index = 0;
-        } else {
-          index = url.indexOf(substrings[0]);
-          if (index == -1) {
-            return false;
-          }
-        }
-        if (indexedRule.anchorRight === 'BOUNDARY') {
-          if (
-            urlPattern[urlPattern.length - 1] != '^' &&
-            urlPattern[urlPattern.length - 1] != '*' &&
-            url.endsWith(substrings[substrings.length - 1])
-          ) {
-            return true;
-          }
-        }
-        if (indexedRule.anchorLeft === 'SUBDOMAIN') {
-          index = url.indexOf(substrings[0]);
-          if (index == -1) {
-            return false;
-          }
-        }
-        let unmatchables =
-          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.%';
-        // DOUBT: Can multiple wildcards be present in the urlPattern?
-        while (urlPattern[x] == '*') {
-          x++;
-        }
-        while (urlPattern[x] == '^') {
-          if (unmatchables.includes(url[index])) {
-            return false;
-          }
-          x++;
-          index++;
-        }
-        let inOrder = url.indexOf(substrings[0], index) != -1;
-        for (let i = 1; i < substrings.length; i++) {
-          if (
-            url.indexOf(substrings[i], url.indexOf(substrings[i - 1])) == -1
-          ) {
-            inOrder = false;
-            break;
-          }
-        }
-        if (inOrder) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    },
-    /*
-    const rulesetObject = {
-        ruleset: rulesetJSONParsed,
-        rulesetId: rulesetIndex
-    }
-    */
-    setParsedRulesList(rulesetObject) {
-      rulesetObject.forEach((rule) => {
+      rulesList.forEach((rule) => {
         const ruleID = rule.id;
         if (this.isValidRule(rule)) {
           let indexedRule = this.urlFilterStore.parseURLFilter(
@@ -165,7 +107,8 @@ export const useRulesStore = defineStore('rules', {
             rule: rule,
             urlParserIndexedRule: indexedRule,
             ruleId: ruleID,
-            rulesetId: rulesetObject.rulesetId
+            rulesetId: rulesetId,
+            isEnabled: isEnabled
           });
         }
       });
@@ -176,7 +119,7 @@ export const useRulesStore = defineStore('rules', {
       let matchedRules = [];
       for (let i = 0; i < ruleset.length; i++) {
         let indexedRule = ruleset[i].urlParserIndexedRule;
-        if (this.urlMatcher(url, indexedRule)) {
+        if (this.urlFilterStore.urlMatcher(url, indexedRule)) {
           matchedRules.push(ruleset[i]);
         }
       }

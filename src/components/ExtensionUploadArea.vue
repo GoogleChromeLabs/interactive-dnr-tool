@@ -23,7 +23,6 @@ function parseManifestFile(manifestFile) {
         manifestStore.isValidManifest(manifestObject); // true if no errors, error object otherwise
       if (manifestValidationResult === true) {
         manifestFileName.value = manifestFile.name;
-        // if manifestValidationResult is true, i.e., there are no errors
         manifestStore.clearRulesetFilePaths();
         manifestStore.setRulesetFilePaths(manifestObject);
       } else {
@@ -44,6 +43,7 @@ function parseManifestFile(manifestFile) {
         window.alert(output);
       }
     } catch (error) {
+      console.log(error);
       window.alert('Error parsing manifest JSON');
     }
   };
@@ -87,13 +87,13 @@ function manifestDropHandler(ev) {
 
 function parseRulesetFile(rulesetFile) {
   const reader = new FileReader();
+  const fileName = rulesetFile.name;
   reader.onload = function (e) {
     try {
-      const rulesetObject = JSON.parse(e.target.result);
-      let rulesetValidationResult = rulesStore.isValidRuleset(rulesetObject); // true if no errors, error object otherwise
+      const rulesList = JSON.parse(e.target.result); // Array of rules for the ruleset (one ruleset per file)
+      let rulesetValidationResult = rulesStore.isValidRuleset(rulesList); // true if no errors, error object otherwise
       if (rulesetValidationResult === true) {
-        manifestStore.addRulesetFilePath(rulesetFile.name);
-        rulesStore.setParsedRulesList(rulesetObject);
+        rulesStore.setParsedRulesList(rulesList, fileName);
       } else {
         let output = 'Issues found:\n';
 

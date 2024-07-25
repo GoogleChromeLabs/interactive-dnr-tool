@@ -1,8 +1,23 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import { useRulesStore } from '@/stores/rulesStore';
+import RequestInput from '@/components/RequestInput.vue';
+import { onMounted } from 'vue';
+
 const rulesStore = useRulesStore();
+const router = useRouter();
 const parsedRulesList = rulesStore.getParsedRulesList;
-console.log(parsedRulesList);
+
+onMounted(() => {
+  if (parsedRulesList.length === 0) {
+    let result = confirm(
+      '0 parsed rules found. Proceed to upload ruleset file(s)?'
+    );
+    if (result) {
+      router.push({ name: 'home' });
+    }
+  }
+});
 </script>
 
 <template>
@@ -14,6 +29,7 @@ console.log(parsedRulesList);
         <RouterLink to="/rules">Rules Editor</RouterLink>
       </nav>
     </div>
+    <RequestInput :parsed-rules="parsedRulesList"></RequestInput>
   </main>
 </template>
 

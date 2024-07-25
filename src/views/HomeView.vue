@@ -35,7 +35,9 @@ function goToRequests() {
         <ExtensionUploadArea />
       </div>
     </header>
-    <button v-show="filesUploaded" @click="goToRequests">GO!</button>
+    <button v-show="filesUploaded" @click="goToRequests">
+      Go to Requests Playground
+    </button>
   </main>
 </template>
 

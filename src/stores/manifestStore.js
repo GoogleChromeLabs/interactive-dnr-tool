@@ -1,36 +1,42 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useManifestStore = defineStore('manifest', {
   state: () => ({
+    /*
+    Signature of each object in rulesetFilePaths
+    {
+      rulesetFilePath: 'path/to/ruleset.json',
+      rulesetId: 'rulesetId',
+      isEnabled: true | false
+    }
+    */
     rulesetFilePaths: []
   }),
   getters: {
     getRulesetFilePaths(state) {
-      return state.rulesetFilePaths
+      return state.rulesetFilePaths;
     }
   },
   actions: {
-    addRulesetFilePath(ruleset) {
-      this.rulesetFilePaths.push(ruleset)
-    },
     clearRulesetFilePaths() {
-      this.rulesetFilePaths = []
+      this.rulesetFilePaths = [];
     },
     setRulesetFilePaths(manifest) {
       if (manifest.declarative_net_request.rule_resources) {
         manifest.declarative_net_request.rule_resources.forEach((ruleset) => {
-          this.addRulesetFilePath({
+          this.rulesetFilePaths.push({
             rulesetFilePath: ruleset.path,
-            rulesetId: ruleset.id
-          })
-        })
+            rulesetId: ruleset.id,
+            isEnabled: ruleset.enabled
+          });
+        });
       }
     },
     isValidManifest(manifest) {
-      let syntaxError = {}
-      syntaxError['type'] = []
-      syntaxError['missingFields'] = []
-      syntaxError['invalidValueTypes'] = []
+      let syntaxError = {};
+      syntaxError['type'] = [];
+      syntaxError['missingFields'] = [];
+      syntaxError['invalidValueTypes'] = [];
 
       // Check for required fields
       const requiredFieldsAndTypes = {
@@ -40,35 +46,35 @@ export const useManifestStore = defineStore('manifest', {
         version: 'string',
         manifest_version: 'number',
         permissions: 'array'
-      }
+      };
 
       for (let field of Object.keys(requiredFieldsAndTypes)) {
         if (!Object.prototype.hasOwnProperty.call(manifest, field)) {
-          syntaxError.isError = true
+          syntaxError.isError = true;
           if (!syntaxError['type'].includes('missingFields')) {
-            syntaxError['type'].push('missingFields')
-            syntaxError['missingFields'] = []
+            syntaxError['type'].push('missingFields');
+            syntaxError['missingFields'] = [];
           }
-          syntaxError['missingFields'].push(field)
+          syntaxError['missingFields'].push(field);
         } else {
-          const expectedType = requiredFieldsAndTypes[field]
-          const actualValue = manifest[field]
+          const expectedType = requiredFieldsAndTypes[field];
+          const actualValue = manifest[field];
           if (expectedType === 'array') {
             if (!Array.isArray(actualValue)) {
-              syntaxError.isError = true
+              syntaxError.isError = true;
               if (!syntaxError['type'].includes('invalidValueTypes')) {
-                syntaxError['type'].push('invalidValueTypes')
-                syntaxError['invalidValueTypes'] = []
+                syntaxError['type'].push('invalidValueTypes');
+                syntaxError['invalidValueTypes'] = [];
               }
-              syntaxError['invalidValueTypes'].push(field)
+              syntaxError['invalidValueTypes'].push(field);
             }
           } else if (typeof actualValue !== expectedType) {
-            syntaxError.isError = true
+            syntaxError.isError = true;
             if (!syntaxError['type'].includes('invalidValueTypes')) {
-              syntaxError['type'].push('invalidValueTypes')
-              syntaxError['invalidValueTypes'] = []
+              syntaxError['type'].push('invalidValueTypes');
+              syntaxError['invalidValueTypes'] = [];
             }
-            syntaxError['invalidValueTypes'].push(field)
+            syntaxError['invalidValueTypes'].push(field);
           }
         }
       }
@@ -121,22 +127,25 @@ export const useManifestStore = defineStore('manifest', {
         version_name: 'string',
         web_accessible_resources: 'array',
         webview: 'object'
-      }
+      };
 
       for (let field of Object.keys(otherFieldsAndTypes)) {
         if (Object.prototype.hasOwnProperty.call(manifest, field)) {
-          if (otherFieldsAndTypes[field] === 'array' && !Array.isArray(manifest[field])) {
-            syntaxError.isError = true
+          if (
+            otherFieldsAndTypes[field] === 'array' &&
+            !Array.isArray(manifest[field])
+          ) {
+            syntaxError.isError = true;
             if (!syntaxError['type'].includes('invalidValueTypes')) {
-              syntaxError['type'].push('invalidValueTypes')
+              syntaxError['type'].push('invalidValueTypes');
             }
-            syntaxError['invalidValueTypes'].push(field)
+            syntaxError['invalidValueTypes'].push(field);
           } else if (typeof manifest[field] !== otherFieldsAndTypes[field]) {
-            syntaxError.isError = true
+            syntaxError.isError = true;
             if (!syntaxError['type'].includes('invalidValueTypes')) {
-              syntaxError['type'].push('invalidValueTypes')
+              syntaxError['type'].push('invalidValueTypes');
             }
-            syntaxError['invalidValueTypes'].push(field)
+            syntaxError['invalidValueTypes'].push(field);
           }
         }
       }
@@ -147,25 +156,25 @@ export const useManifestStore = defineStore('manifest', {
         !manifest.permissions.includes('declarativeNetRequest') &&
         !manifest.permissions.includes('declarativeNetRequestWithHostAccess')
       ) {
-        syntaxError.isError = true
+        syntaxError.isError = true;
         if (!syntaxError['type'].includes('missingPermissions')) {
-          syntaxError['type'].push('missingPermissions')
+          syntaxError['type'].push('missingPermissions');
         }
       }
 
       // Remove empty error types
       if (syntaxError['missingFields'].length === 0) {
-        delete syntaxError['missingFields']
+        delete syntaxError['missingFields'];
       }
       if (syntaxError['invalidValueTypes'].length === 0) {
-        delete syntaxError['invalidValueTypes']
+        delete syntaxError['invalidValueTypes'];
       }
 
       if (syntaxError.isError) {
-        return syntaxError
+        return syntaxError;
       } else {
-        return true
+        return true;
       }
     }
   }
-})
+});
