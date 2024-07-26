@@ -44,76 +44,54 @@ function isValidURLFilter(urlFilterString) {
   }
   return true;
 }
-
-function getHighestPriorityRules(matchedRulesList) {
-  // priority based on priority value
-  const highestPriority = Math.max(
-    ...matchedRulesList.map((rule) => rule.rule.priority)
-  );
-  let highestPriorityRules = matchedRulesList.filter(
-    (rule) => rule.rule.priority === highestPriority
-  );
-  if (highestPriorityRules.length === 1) {
-    return highestPriorityRules;
-  }
-  // priority based on action type
-  const actionByPriority = [
-    'allow',
-    'allowAllRequests',
-    'block',
-    'upgradeScheme',
-    'redirect',
-    'modifyHeaders'
-  ]; // 'modifyHeaders' dealt with differently
-  const highestPriorityAction = Math.max(
-    ...highestPriorityRules.map((rule) =>
-      actionByPriority.indexOf(rule.rule.action.type)
-    )
-  );
-  highestPriorityRules = highestPriorityRules.filter(
-    (rule) => rule.rule.action.type === actionByPriority[highestPriorityAction]
-  );
-  // If priority is not block or redirect, and a 'modifyHeaders' rule exists
-  let modifyHeadersRules = matchedRulesList.filter(
-    (rule) => rule.rule.action.type === 'modifyHeaders'
-  );
-  if (
-    actionByPriority[highestPriorityAction] !== 'block' &&
-    actionByPriority[highestPriorityAction] !== 'redirect' &&
-    modifyHeadersRules.length !== 0
-  ) {
-    // Check for allow or allowAllRequests rule
-    let allowRules = highestPriorityRules.filter(
-      (rule) =>
-        rule.rule.action.type === 'allow' ||
-        rule.rule.action.type === 'allowAllRequests'
-    );
-    // Find highest priority allow or allowAllRequests rule
-    let highestAllowPriority = -1;
-    let eligibleModifyHeadersRules = [];
-    if (allowRules.length > 0) {
-      highestAllowPriority = Math.max(
-        ...allowRules.map((rule) => rule.rule.priority)
-      );
-      // Then find all modifyHeaders rules with the same priority or higher
-      eligibleModifyHeadersRules = modifyHeadersRules.filter(
-        (rule) => rule.rule.priority <= highestAllowPriority
-      );
-    } else {
-      eligibleModifyHeadersRules = modifyHeadersRules;
+function sortRules(parsedRulesList) {
+  parsedRulesList.sort((a, b) => {
+    // Compare by developer-defined priority
+    if (a.rule.priority !== b.rule.priority) {
+      return b.rule.priority - a.rule.priority;
     }
-    // Then find the highest priority modifyHeaders rule based on dev defined priority
-    const highestModifyHeadersPriority = Math.max(
-      ...eligibleModifyHeadersRules.map((rule) => rule.rule.priority)
-    );
-    let highestModifyHeadersRules = eligibleModifyHeadersRules.filter(
-      (rule) => rule.rule.priority === highestModifyHeadersPriority
-    );
-    // If there is only one highest priority modifyHeaders rule, return it
-    highestPriorityRules = highestModifyHeadersRules;
-    // TODO: If not, check the type of headers modified
-  }
-  return highestPriorityRules;
+
+    // If priorities are equal, compare by action field
+    const actionOrder = [
+      'allow',
+      'allowAllRequests',
+      'block',
+      'upgradeScheme',
+      'redirect'
+    ];
+    const aActionIndex = actionOrder.indexOf(a.rule.action.type);
+    const bActionIndex = actionOrder.indexOf(b.rule.action.type);
+
+    if (aActionIndex !== bActionIndex) {
+      return aActionIndex - bActionIndex;
+    }
+
+    // If both priority and action type are the same, compare modifyHeaders rules
+    if (a.rule.action.type !== 'block' && a.rule.action.type !== 'redirect') {
+      const aModifyHeaders = a.rule.action.modifyHeaders || [];
+      const bModifyHeaders = b.rule.action.modifyHeaders || [];
+
+      for (
+        let i = 0;
+        i < Math.min(aModifyHeaders.length, bModifyHeaders.length);
+        i++
+      ) {
+        const aHeader = aModifyHeaders[i];
+        const bHeader = bModifyHeaders[i];
+
+        // Compare header modification operations
+        if (aHeader.operation !== bHeader.operation) {
+          const operationOrder = ['append', 'set', 'remove'];
+          const aOperationIndex = operationOrder.indexOf(aHeader.operation);
+          const bOperationIndex = operationOrder.indexOf(bHeader.operation);
+          return aOperationIndex - bOperationIndex;
+        }
+      }
+    }
+
+    // If all criteria are the same, retain original order
+    return 0;
+  });
 }
 
-export { isValidURLFilter, getHighestPriorityRules };
+export { isValidURLFilter, sortRules };

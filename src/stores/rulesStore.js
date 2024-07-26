@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useURLFilterStore } from './urlFilterStore';
 import { useManifestStore } from './manifestStore';
-import { isValidURLFilter, getHighestPriorityRules } from '@/utils';
+import { isValidURLFilter, sortRules } from '@/utils';
 
 // const urlFilterStore = useURLFilterStore()
 
@@ -112,19 +112,18 @@ export const useRulesStore = defineStore('rules', {
           });
         }
       });
+      sortRules(this.parsedRulesList);
     },
     requestMatcher(request) {
       let url = request.url;
-      let ruleset = this.parsedRulesList;
       let matchedRules = [];
-      for (let i = 0; i < ruleset.length; i++) {
-        let indexedRule = ruleset[i].urlParserIndexedRule;
+      for (let i = 0; i < this.parsedRulesList.length; i++) {
+        let indexedRule = this.parsedRulesList[i].urlParserIndexedRule;
         if (this.urlFilterStore.urlMatcher(url, indexedRule)) {
-          matchedRules.push(ruleset[i]);
+          matchedRules.push(this.parsedRulesList[i]);
         }
       }
-      let highestPriorityRules = getHighestPriorityRules(matchedRules);
-      return highestPriorityRules;
+      return matchedRules;
     }
   }
 });

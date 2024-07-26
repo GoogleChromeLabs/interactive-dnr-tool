@@ -1,21 +1,14 @@
 <script setup>
 import { ref } from 'vue';
-import { getHighestPriorityRules } from '@/utils';
-import { useURLFilterStore } from '@/stores/urlFilterStore';
-import { defineProps } from 'vue';
+import { useRulesStore } from '../stores/rulesStore';
 
-const props = defineProps({
-  parsedRules: Array
-});
-const urlFilterStore = useURLFilterStore();
+const rulesStore = useRulesStore();
 
 const httpMethod = ref('GET');
 const url = ref('');
 const headers = ref('');
 const body = ref('');
 const response = ref(null);
-
-const parsedRules = props.parsedRules;
 
 function submitRequest(ev) {
   ev.preventDefault();
@@ -33,23 +26,8 @@ function submitRequest(ev) {
 }
 
 function requestMatcher(request) {
-  let matchedRulesList = [];
-  let output = '';
-  for (let rule of parsedRules) {
-    // console.log(rule); // correct
-    // console.log(request.url); // correct
-    if (
-      urlFilterStore.urlMatcher(request.url, rule.urlParserIndexedRule) === true
-    ) {
-      matchedRulesList.push(rule);
-    }
-  }
-  console.log('Matched rules (1): ' + matchedRulesList.join(',\n'));
-  let highestPriorityRules = getHighestPriorityRules(matchedRulesList);
-  for (let rule of highestPriorityRules) {
-    output += JSON.stringify(rule, null, 2) + '\n';
-  }
-  console.log('Matched rules (2): ' + output);
+  const matchedRulesList = rulesStore.requestMatcher(request);
+  console.log(matchedRulesList);
 }
 </script>
 
