@@ -27,12 +27,19 @@ export const useRulesStore = defineStore('rules', {
     */
     parsedRulesList: [],
     rulesetFilesUploaded: false,
+    requestMatched: false,
     urlFilterStore: useURLFilterStore(),
     manifestStore: useManifestStore()
   }),
   getters: {
     getParsedRulesList(state) {
       return state.parsedRulesList;
+    },
+    getRulesetFilesUploaded(state) {
+      return state.rulesetFilesUploaded;
+    },
+    getRequestMatched(state) {
+      return state.requestMatched;
     }
   },
   actions: {
@@ -123,6 +130,7 @@ export const useRulesStore = defineStore('rules', {
           matchedRules.push(this.parsedRulesList[i]);
         }
       }
+      this.requestMatched = true;
       return matchedRules;
     }
   }

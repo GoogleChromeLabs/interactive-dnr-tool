@@ -1,13 +1,14 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { useRulesStore } from '@/stores/rulesStore';
+import { computed, onMounted } from 'vue';
 import RequestInput from '@/components/RequestInput.vue';
-import { onMounted } from 'vue';
+import AnimationStage from '@/components/AnimationStage.vue';
 
 const rulesStore = useRulesStore();
 const router = useRouter();
 const parsedRulesList = rulesStore.getParsedRulesList;
-
+let requestMatched = computed(() => rulesStore.getRequestMatched);
 onMounted(() => {
   if (parsedRulesList.length === 0) {
     let result = confirm(
@@ -29,7 +30,11 @@ onMounted(() => {
         <RouterLink to="/rules">Rules Editor</RouterLink>
       </nav>
     </div>
-    <RequestInput :parsed-rules="parsedRulesList"></RequestInput>
+    <div class="flexbox">
+      <div><RequestInput :parsed-rules="parsedRulesList" /></div>
+      <div><AnimationStage v-show="requestMatched" /></div>
+    </div>
+    <br-b />
   </main>
 </template>
 
@@ -57,5 +62,12 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+.flexbox {
+  display: flex;
+  justify-content: space-between;
+  align-items: right;
+  margin-top: 2rem;
 }
 </style>

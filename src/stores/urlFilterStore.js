@@ -133,7 +133,6 @@ export const useURLFilterStore = defineStore('urlFilter', {
         }
         substrings.push(urlPattern);
       } else if (indexedRule.urlPatternType === 'WILDCARDED') {
-        let substrings = [];
         let string = '';
         for (let i = 0; i < urlPattern.length; i++) {
           if (
@@ -149,7 +148,9 @@ export const useURLFilterStore = defineStore('urlFilter', {
             string += urlPattern[i];
           }
         }
-        substrings.push(string);
+        if (string) {
+          substrings.push(string);
+        }
       }
       let x = 0; // index in urlPattern
       let index; // index in url where the checking starts

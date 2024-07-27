@@ -18,16 +18,12 @@ function submitRequest(ev) {
     headers: JSON.parse(headers.value || '{}'),
     body: body.value
   };
-  requestMatcher(formObject);
+  const matchedRulesList = rulesStore.requestMatcher(formObject);
+  console.log(matchedRulesList);
   httpMethod.value = 'GET';
   url.value = '';
   headers.value = '';
   body.value = '';
-}
-
-function requestMatcher(request) {
-  const matchedRulesList = rulesStore.requestMatcher(request);
-  console.log(matchedRulesList);
 }
 </script>
 
