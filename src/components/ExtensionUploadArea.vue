@@ -90,10 +90,10 @@ function parseRulesetFile(rulesetFile) {
   const fileName = rulesetFile.name;
   reader.onload = function (e) {
     try {
-      const rulesList = JSON.parse(e.target.result); // Array of rules for the ruleset (one ruleset per file)
-      let rulesetValidationResult = rulesStore.isValidRuleset(rulesList); // true if no errors, error object otherwise
+      const ruleset = JSON.parse(e.target.result); // Array of rules for the ruleset (one ruleset per file)
+      let rulesetValidationResult = rulesStore.isValidRuleset(ruleset); // true if no errors, error object otherwise
       if (rulesetValidationResult === true) {
-        rulesStore.setParsedRulesList(rulesList, fileName);
+        rulesStore.setParsedRulesList(ruleset, fileName);
       } else {
         let output = 'Issues found:\n';
 
@@ -119,7 +119,7 @@ function parseRulesetFile(rulesetFile) {
   reader.readAsText(rulesetFile);
 }
 
-function rulesDropHandler(ev) {
+function rulesetFilesDropHandler(ev) {
   ev.preventDefault();
   let numFiles = 0;
 
@@ -192,7 +192,7 @@ function removeDragData(ev) {
     <div
       class="drop_zone"
       id="ruleset_drop_zone"
-      @drop="rulesDropHandler"
+      @drop="rulesetFilesDropHandler"
       @dragover="dragOverHandler"
     >
       <p v-if="rulesetFileNames === ''">Drag one or more ruleset files ...</p>

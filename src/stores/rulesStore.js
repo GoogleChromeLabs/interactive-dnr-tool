@@ -22,12 +22,14 @@ export const useRulesStore = defineStore('rules', {
       ruleId: 1,
       rulesetId: 1,
       urlParserIndexedRule: {},
-      isEnabled: true | false
+      isEnabled: true | false,
+      rulesetFileName: 'rules_1.json'
     }
     */
     parsedRulesList: [],
     rulesetFilesUploaded: false,
     requestMatched: false,
+    matchedRule: {},
     urlFilterStore: useURLFilterStore(),
     manifestStore: useManifestStore()
   }),
@@ -40,6 +42,9 @@ export const useRulesStore = defineStore('rules', {
     },
     getRequestMatched(state) {
       return state.requestMatched;
+    },
+    getRulsetsList(state) {
+      return state.rulesetsList;
     }
   },
   actions: {
@@ -48,6 +53,20 @@ export const useRulesStore = defineStore('rules', {
     },
     setRulesetFilesUploaded(value) {
       this.rulesetFilesUploaded = value;
+    },
+    getRuleset(rulesetFileName) {
+      if (!this.getParsedRulesList) {
+        return [];
+      }
+      let ruleset = [];
+      for (let index in this.parsedRulesList) {
+        const ruleItem = this.parsedRulesList[index];
+
+        if (ruleItem.rulesetFileName === rulesetFileName) {
+          ruleset.push(ruleItem.rule);
+        }
+      }
+      return ruleset;
     },
     // Checks validity of URLFilter string
     isValidURLFilter,
@@ -96,30 +115,36 @@ export const useRulesStore = defineStore('rules', {
 
       return true;
     },
-    setParsedRulesList(rulesList, fileName) {
+    setParsedRulesList(ruleset, fileName) {
       let rulesetId = 0;
       let isEnabled = false;
-      for (let ruleset of this.manifestStore.getRulesetFilePaths)
-        if (ruleset.rulesetFilePath === fileName) {
-          rulesetId = ruleset.rulesetId;
-          isEnabled = ruleset.isEnabled;
-        }
-      rulesList.forEach((rule) => {
-        const ruleID = rule.id;
-        if (this.isValidRule(rule)) {
-          let indexedRule = this.urlFilterStore.parseURLFilter(
-            rule.condition.urlFilter
-          );
-          this.parsedRulesList.push({
-            rule: rule,
-            urlParserIndexedRule: indexedRule,
-            ruleId: ruleID,
-            rulesetId: rulesetId,
-            isEnabled: isEnabled
+      let rulesetFileName = '';
+      for (let rulesetFileInfoObjects of this.manifestStore.getRulesetFilePaths)
+        if (rulesetFileInfoObjects.rulesetFilePath === fileName) {
+          rulesetId = rulesetFileInfoObjects.rulesetId;
+          isEnabled = rulesetFileInfoObjects.isEnabled;
+          rulesetFileName = fileName;
+          ruleset.forEach((rule) => {
+            const ruleID = rule.id;
+            if (this.isValidRule(rule)) {
+              let indexedRule = this.urlFilterStore.parseURLFilter(
+                rule.condition.urlFilter
+              );
+              this.parsedRulesList.push({
+                rule: rule,
+                urlParserIndexedRule: indexedRule,
+                ruleId: ruleID,
+                rulesetId: rulesetId,
+                isEnabled: isEnabled,
+                rulesetFileName: rulesetFileName
+              });
+            }
           });
         }
-      });
       sortRules(this.parsedRulesList);
+    },
+    clearParsedRulesList() {
+      this.parsedRulesList = [];
     },
     requestMatcher(request) {
       let url = request.url;
