@@ -42,16 +42,16 @@ const loadFile = () => {
   editor = new JSONEditor(container, options);
   editor.set(rulesetToEdit);
 };
-/*
-const saveRules = () => {
+
+const saveRuleset = () => {
   try {
-    const updatedJson = editor.get();
-    console.log('Updated JSON:', updatedJson);
-    // emit('save', updatedJson);
-  } catch (err) {
-    console.error('Invalid JSON:', err);
+    rulesStore.saveRuleset(rulesetFileName.value, editor.get());
+    console.log(rulesStore.getParsedRulesList);
+  } catch (error) {
+    console.error(error);
+    window.alert('Error saving ruleset');
   }
-};*/
+};
 </script>
 
 <template>
@@ -63,7 +63,7 @@ const saveRules = () => {
     </select>
     <div class="rules-editor"></div>
     <div ref="jsonEditor" class="jsoneditor-container"></div>
-    <button>Save</button>
+    <button @click="saveRuleset">Save</button>
   </main>
 </template>
 

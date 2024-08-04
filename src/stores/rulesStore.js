@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { useURLFilterStore } from './urlFilterStore';
 import { useManifestStore } from './manifestStore';
 import { isValidURLFilter, sortRules } from '@/utils';
+import { parse } from 'vue/compiler-sfc';
 
 // const urlFilterStore = useURLFilterStore()
 
@@ -68,6 +69,59 @@ export const useRulesStore = defineStore('rules', {
       }
       return ruleset;
     },
+    saveRuleset(rulesetFileName, ruleset) {
+      let updatedRulesList = [];
+      let processedRuleIds = new Set();
+
+      for (let parsedRule of this.parsedRulesList) {
+        if (parsedRule.rulesetFileName === rulesetFileName) {
+          let ruleUpdated = false;
+
+          for (let rule of ruleset) {
+            if (!this.isValidRule(rule)) continue;
+            let indexedRule = this.urlFilterStore.parseURLFilter(
+              rule.condition.urlFilter
+            );
+
+            if (rule.id === parsedRule.ruleId) {
+              parsedRule.rule = rule;
+              parsedRule.urlParserIndexedRule = indexedRule;
+              updatedRulesList.push(parsedRule);
+              processedRuleIds.add(rule.id);
+              ruleUpdated = true;
+              break; // Exit the inner loop since the rule is updated
+            }
+          }
+
+          if (!ruleUpdated) {
+            updatedRulesList.push(parsedRule);
+          }
+        } else {
+          updatedRulesList.push(parsedRule);
+        }
+      }
+
+      // Add new rules that are not present in parsedRulesList
+      for (let rule of ruleset) {
+        if (processedRuleIds.has(rule.id)) continue;
+        if (this.isValidRule(rule)) {
+          let indexedRule = this.urlFilterStore.parseURLFilter(
+            rule.condition.urlFilter
+          );
+          updatedRulesList.push({
+            rule: rule,
+            urlParserIndexedRule: indexedRule,
+            ruleId: rule.id,
+            rulesetID: this.getRulesetIdForFileName(rulesetFileName), // Assuming a method to get rulesetID
+            isEnabled: true,
+            rulesetFileName: rulesetFileName
+          });
+        }
+      }
+
+      this.parsedRulesList = updatedRulesList;
+      console.log(this.parsedRulesList);
+    },
     // Checks validity of URLFilter string
     isValidURLFilter,
     // Checks validity of rule, including checking validity of its condition, i.e., the URLFilter string
@@ -116,16 +170,9 @@ export const useRulesStore = defineStore('rules', {
       return true;
     },
     setParsedRulesList(ruleset, fileName) {
-      let rulesetId = 0;
-      let isEnabled = false;
-      let rulesetFileName = '';
       for (let rulesetFileInfoObjects of this.manifestStore.getRulesetFilePaths)
         if (rulesetFileInfoObjects.rulesetFilePath === fileName) {
-          rulesetId = rulesetFileInfoObjects.rulesetId;
-          isEnabled = rulesetFileInfoObjects.isEnabled;
-          rulesetFileName = fileName;
           ruleset.forEach((rule) => {
-            const ruleID = rule.id;
             if (this.isValidRule(rule)) {
               let indexedRule = this.urlFilterStore.parseURLFilter(
                 rule.condition.urlFilter
@@ -133,10 +180,10 @@ export const useRulesStore = defineStore('rules', {
               this.parsedRulesList.push({
                 rule: rule,
                 urlParserIndexedRule: indexedRule,
-                ruleId: ruleID,
-                rulesetId: rulesetId,
-                isEnabled: isEnabled,
-                rulesetFileName: rulesetFileName
+                ruleId: rule.id,
+                rulesetID: rulesetFileInfoObjects.rulesetId,
+                isEnabled: rulesetFileInfoObjects.isEnabled,
+                rulesetFileName: fileName
               });
             }
           });
