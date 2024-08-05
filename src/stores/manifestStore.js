@@ -176,5 +176,9 @@ export const useManifestStore = defineStore('manifest', {
         return true;
       }
     }
+  },
+  persist: {
+    storage: sessionStorage,
+    paths: ['rulesetFilePaths']
   }
 });

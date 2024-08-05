@@ -120,7 +120,6 @@ export const useRulesStore = defineStore('rules', {
       }
 
       this.parsedRulesList = updatedRulesList;
-      console.log(this.parsedRulesList);
     },
     // Checks validity of URLFilter string
     isValidURLFilter,
@@ -205,5 +204,9 @@ export const useRulesStore = defineStore('rules', {
       this.requestMatched = true;
       return matchedRules;
     }
+  },
+  persist: {
+    storage: sessionStorage,
+    paths: ['parsedRulesList']
   }
 });
