@@ -46,7 +46,7 @@ const loadFile = () => {
 const saveRuleset = () => {
   try {
     rulesStore.saveRuleset(rulesetFileName.value, editor.get());
-    console.log(rulesStore.getParsedRulesList);
+    window.alert('Saved changes to ' + rulesetFileName.value);
   } catch (error) {
     console.error(error);
     window.alert('Error saving ruleset');

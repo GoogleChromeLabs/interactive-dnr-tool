@@ -44,7 +44,7 @@ export const useRulesStore = defineStore('rules', {
     getRequestMatched(state) {
       return state.requestMatched;
     },
-    getRulsetsList(state) {
+    getRulesetsList(state) {
       return state.rulesetsList;
     }
   },
@@ -73,33 +73,28 @@ export const useRulesStore = defineStore('rules', {
       let updatedRulesList = [];
       let processedRuleIds = new Set();
 
-      for (let parsedRule of this.parsedRulesList) {
-        if (parsedRule.rulesetFileName === rulesetFileName) {
-          let ruleUpdated = false;
+      let matchingParsedRules = this.parsedRulesList.filter(
+        (parsedRule) => parsedRule.rulesetFileName === rulesetFileName
+      );
+      for (let parsedRule of matchingParsedRules) {
+        let rule = ruleset.find((r) => r.id === parsedRule.ruleId);
 
-          for (let rule of ruleset) {
-            if (!this.isValidRule(rule)) continue;
-            let indexedRule = this.urlFilterStore.parseURLFilter(
-              rule.condition.urlFilter
-            );
-
-            if (rule.id === parsedRule.ruleId) {
-              parsedRule.rule = rule;
-              parsedRule.urlParserIndexedRule = indexedRule;
-              updatedRulesList.push(parsedRule);
-              processedRuleIds.add(rule.id);
-              ruleUpdated = true;
-              break; // Exit the inner loop since the rule is updated
-            }
-          }
-
-          if (!ruleUpdated) {
-            updatedRulesList.push(parsedRule);
-          }
+        if (rule && this.isValidRule(rule)) {
+          let indexedRule = this.urlFilterStore.parseURLFilter(
+            rule.condition.urlFilter
+          );
+          parsedRule.rule = rule;
+          parsedRule.urlParserIndexedRule = indexedRule;
+          updatedRulesList.push(parsedRule);
+          processedRuleIds.add(rule.id);
         } else {
           updatedRulesList.push(parsedRule);
         }
       }
+      let nonMatchingParsedRules = this.parsedRulesList.filter(
+        (parsedRule) => parsedRule.rulesetFileName !== rulesetFileName
+      );
+      updatedRulesList.push(...nonMatchingParsedRules);
 
       // Add new rules that are not present in parsedRulesList
       for (let rule of ruleset) {
@@ -133,15 +128,6 @@ export const useRulesStore = defineStore('rules', {
       if (rule.priority && !Number.isInteger(rule.priority)) {
         isValid = false;
         console.log('priority');
-      }
-      if (
-        !rule.action ||
-        typeof rule.action != 'object' ||
-        !rule.action.type ||
-        (rule.action && typeof rule.action.type != 'string')
-      ) {
-        isValid = false;
-        console.log('action');
       }
       if (!rule.condition || typeof rule.condition != 'object') {
         isValid = false;
