@@ -193,7 +193,10 @@ export const useRulesStore = defineStore('rules', {
       let matchedRules = [];
       for (let i = 0; i < this.parsedRulesList.length; i++) {
         let indexedRule = this.parsedRulesList[i].urlParserIndexedRule;
-        if (this.urlFilterStore.urlMatcher(url, indexedRule)) {
+        if (
+          this.urlFilterStore.urlMatcher(url, indexedRule) &&
+          this.parsedRulesList[i].isEnabled
+        ) {
           matchedRules.push(this.parsedRulesList[i]);
         }
       }
