@@ -5,6 +5,7 @@ export const useManifestStore = defineStore('manifest', {
     /*
     Signature of each object in rulesetFilePaths
     {
+      rulesetFileName: 'rules_1.json',
       rulesetFilePath: 'path/to/ruleset.json',
       rulesetId: 'rulesetId',
       isEnabled: true | false
@@ -24,13 +25,23 @@ export const useManifestStore = defineStore('manifest', {
     setRulesetFilePaths(manifest) {
       if (manifest.declarative_net_request.rule_resources) {
         manifest.declarative_net_request.rule_resources.forEach((ruleset) => {
+          const rulesetFilePath = ruleset.path;
+          const rulesetFileName = rulesetFilePath.split('/').pop();
+
           this.rulesetFilePaths.push({
-            rulesetFilePath: ruleset.path,
+            rulesetFileName: rulesetFileName,
+            rulesetFilePath: rulesetFilePath,
             rulesetId: ruleset.id,
             isEnabled: ruleset.enabled
           });
         });
       }
+    },
+    toggleRulesetAvailability(rulesetFileName) {
+      const rulesetFilePathObject = this.rulesetFilePaths.find(
+        (ruleset) => ruleset.rulesetFileName === rulesetFileName
+      );
+      rulesetFilePathObject.isEnabled = !rulesetFilePathObject.isEnabled;
     },
     isValidManifest(manifest) {
       let syntaxError = {};

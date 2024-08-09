@@ -175,6 +175,16 @@ export const useRulesStore = defineStore('rules', {
         }
       sortRules(this.parsedRulesList);
     },
+    toggleRulesAvailability(rulesetFileName) {
+      let updatedRulesList = [];
+      for (let parsedRule of this.parsedRulesList) {
+        if (parsedRule.rulesetFileName === rulesetFileName) {
+          parsedRule.isEnabled = !parsedRule.isEnabled;
+        }
+        updatedRulesList.push(parsedRule);
+      }
+      this.parsedRulesList = updatedRulesList;
+    },
     clearParsedRulesList() {
       this.parsedRulesList = [];
     },

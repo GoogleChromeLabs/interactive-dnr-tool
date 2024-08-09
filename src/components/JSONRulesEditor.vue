@@ -10,12 +10,12 @@ const rulesStore = useRulesStore();
 const manifestStore = useManifestStore();
 
 const rulesetFileName = defineModel();
-let rulesetToEdit = [];
 const fileNames = manifestStore.getRulesetFilePaths.map(
   (rulesetFilePathObject) => rulesetFilePathObject.rulesetFilePath
 );
 
 const jsonEditor = ref(null);
+const isEnabledRuleset = ref(false);
 let editor = null;
 
 onBeforeUnmount(() => {
@@ -26,7 +26,12 @@ onBeforeUnmount(() => {
 
 const loadFile = () => {
   // rulesetFileName has been set from the drop-down by the user
-  rulesetToEdit = rulesStore.getRuleset(rulesetFileName.value);
+  const rulesetToEdit = rulesStore.getRuleset(rulesetFileName.value);
+  const rulesetFilePathObject = manifestStore.getRulesetFilePaths.find(
+    (rulesetFilePathObject) =>
+      rulesetFilePathObject.rulesetFileName === rulesetFileName.value
+  );
+  isEnabledRuleset.value = rulesetFilePathObject.isEnabled;
   const container = jsonEditor.value;
   const options = {
     mode: 'code',
@@ -52,6 +57,12 @@ const saveRuleset = () => {
     window.alert('Error saving ruleset');
   }
 };
+
+const toggleAvailable = () => {
+  manifestStore.toggleRulesetAvailability(rulesetFileName.value);
+  rulesStore.toggleRulesAvailability(rulesetFileName.value);
+  isEnabledRuleset.value = !isEnabledRuleset.value;
+};
 </script>
 
 <template>
@@ -64,6 +75,10 @@ const saveRuleset = () => {
     <div class="rules-editor"></div>
     <div ref="jsonEditor" class="jsoneditor-container"></div>
     <button @click="saveRuleset">Save</button>
+    <button v-if="isEnabledRuleset" @click="toggleAvailable">
+      Disable Ruleset
+    </button>
+    <button v-else @click="toggleAvailable">Enable Ruleset</button>
   </main>
 </template>
 
