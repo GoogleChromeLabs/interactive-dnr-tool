@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { useURLFilterStore } from './urlFilterStore';
 import { useManifestStore } from './manifestStore';
 import { isValidURLFilter, sortRules } from '@/utils';
+import { parse } from 'vue/compiler-sfc';
 
 // const urlFilterStore = useURLFilterStore()
 
@@ -22,12 +23,14 @@ export const useRulesStore = defineStore('rules', {
       ruleId: 1,
       rulesetId: 1,
       urlParserIndexedRule: {},
-      isEnabled: true | false
+      isEnabled: true | false,
+      rulesetFileName: 'rules_1.json'
     }
     */
     parsedRulesList: [],
     rulesetFilesUploaded: false,
     requestMatched: false,
+    matchedRule: {},
     urlFilterStore: useURLFilterStore(),
     manifestStore: useManifestStore()
   }),
@@ -40,6 +43,9 @@ export const useRulesStore = defineStore('rules', {
     },
     getRequestMatched(state) {
       return state.requestMatched;
+    },
+    getRulesetsList(state) {
+      return state.rulesetsList;
     }
   },
   actions: {
@@ -48,6 +54,67 @@ export const useRulesStore = defineStore('rules', {
     },
     setRulesetFilesUploaded(value) {
       this.rulesetFilesUploaded = value;
+    },
+    getRuleset(rulesetFileName) {
+      if (!this.getParsedRulesList) {
+        return [];
+      }
+      let ruleset = [];
+      for (let index in this.parsedRulesList) {
+        const ruleItem = this.parsedRulesList[index];
+
+        if (ruleItem.rulesetFileName === rulesetFileName) {
+          ruleset.push(ruleItem.rule);
+        }
+      }
+      return ruleset;
+    },
+    saveRuleset(rulesetFileName, ruleset) {
+      let updatedRulesList = [];
+      let processedRuleIds = new Set();
+
+      let matchingParsedRules = this.parsedRulesList.filter(
+        (parsedRule) => parsedRule.rulesetFileName === rulesetFileName
+      );
+      for (let parsedRule of matchingParsedRules) {
+        let rule = ruleset.find((r) => r.id === parsedRule.ruleId);
+
+        if (rule && this.isValidRule(rule)) {
+          let indexedRule = this.urlFilterStore.parseURLFilter(
+            rule.condition.urlFilter
+          );
+          parsedRule.rule = rule;
+          parsedRule.urlParserIndexedRule = indexedRule;
+          updatedRulesList.push(parsedRule);
+          processedRuleIds.add(rule.id);
+        } else {
+          updatedRulesList.push(parsedRule);
+        }
+      }
+      let nonMatchingParsedRules = this.parsedRulesList.filter(
+        (parsedRule) => parsedRule.rulesetFileName !== rulesetFileName
+      );
+      updatedRulesList.push(...nonMatchingParsedRules);
+
+      // Add new rules that are not present in parsedRulesList
+      for (let rule of ruleset) {
+        if (processedRuleIds.has(rule.id)) continue;
+        if (this.isValidRule(rule)) {
+          let indexedRule = this.urlFilterStore.parseURLFilter(
+            rule.condition.urlFilter
+          );
+          updatedRulesList.push({
+            rule: rule,
+            urlParserIndexedRule: indexedRule,
+            ruleId: rule.id,
+            rulesetID: this.getRulesetIdForFileName(rulesetFileName), // Assuming a method to get rulesetID
+            isEnabled: true,
+            rulesetFileName: rulesetFileName
+          });
+        }
+      }
+
+      this.parsedRulesList = updatedRulesList;
     },
     // Checks validity of URLFilter string
     isValidURLFilter,
@@ -61,15 +128,6 @@ export const useRulesStore = defineStore('rules', {
       if (rule.priority && !Number.isInteger(rule.priority)) {
         isValid = false;
         console.log('priority');
-      }
-      if (
-        !rule.action ||
-        typeof rule.action != 'object' ||
-        !rule.action.type ||
-        (rule.action && typeof rule.action.type != 'string')
-      ) {
-        isValid = false;
-        console.log('action');
       }
       if (!rule.condition || typeof rule.condition != 'object') {
         isValid = false;
@@ -96,42 +154,58 @@ export const useRulesStore = defineStore('rules', {
 
       return true;
     },
-    setParsedRulesList(rulesList, fileName) {
-      let rulesetId = 0;
-      let isEnabled = false;
-      for (let ruleset of this.manifestStore.getRulesetFilePaths)
-        if (ruleset.rulesetFilePath === fileName) {
-          rulesetId = ruleset.rulesetId;
-          isEnabled = ruleset.isEnabled;
-        }
-      rulesList.forEach((rule) => {
-        const ruleID = rule.id;
-        if (this.isValidRule(rule)) {
-          let indexedRule = this.urlFilterStore.parseURLFilter(
-            rule.condition.urlFilter
-          );
-          this.parsedRulesList.push({
-            rule: rule,
-            urlParserIndexedRule: indexedRule,
-            ruleId: ruleID,
-            rulesetId: rulesetId,
-            isEnabled: isEnabled
+    setParsedRulesList(ruleset, fileName) {
+      for (let rulesetFileInfoObjects of this.manifestStore.getRulesetFilePaths)
+        if (rulesetFileInfoObjects.rulesetFilePath === fileName) {
+          ruleset.forEach((rule) => {
+            if (this.isValidRule(rule)) {
+              let indexedRule = this.urlFilterStore.parseURLFilter(
+                rule.condition.urlFilter
+              );
+              this.parsedRulesList.push({
+                rule: rule,
+                urlParserIndexedRule: indexedRule,
+                ruleId: rule.id,
+                rulesetID: rulesetFileInfoObjects.rulesetId,
+                isEnabled: rulesetFileInfoObjects.isEnabled,
+                rulesetFileName: fileName
+              });
+            }
           });
         }
-      });
       sortRules(this.parsedRulesList);
+    },
+    toggleRulesAvailability(rulesetFileName) {
+      let updatedRulesList = [];
+      for (let parsedRule of this.parsedRulesList) {
+        if (parsedRule.rulesetFileName === rulesetFileName) {
+          parsedRule.isEnabled = !parsedRule.isEnabled;
+        }
+        updatedRulesList.push(parsedRule);
+      }
+      this.parsedRulesList = updatedRulesList;
+    },
+    clearParsedRulesList() {
+      this.parsedRulesList = [];
     },
     requestMatcher(request) {
       let url = request.url;
       let matchedRules = [];
       for (let i = 0; i < this.parsedRulesList.length; i++) {
         let indexedRule = this.parsedRulesList[i].urlParserIndexedRule;
-        if (this.urlFilterStore.urlMatcher(url, indexedRule)) {
+        if (
+          this.urlFilterStore.urlMatcher(url, indexedRule) &&
+          this.parsedRulesList[i].isEnabled
+        ) {
           matchedRules.push(this.parsedRulesList[i]);
         }
       }
       this.requestMatched = true;
       return matchedRules;
     }
+  },
+  persist: {
+    storage: sessionStorage,
+    paths: ['parsedRulesList']
   }
 });

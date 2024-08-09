@@ -1,4 +1,7 @@
-<script setup></script>
+<script setup>
+import 'jsoneditor/dist/jsoneditor.css';
+import JSONRulesEditor from '@/components/JSONRulesEditor.vue';
+</script>
 
 <template>
   <main>
@@ -9,6 +12,7 @@
         <RouterLink to="/requests">Requests Playground</RouterLink>
       </nav>
     </div>
+    <JSONRulesEditor />
   </main>
 </template>
 
