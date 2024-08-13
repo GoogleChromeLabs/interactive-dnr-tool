@@ -34,7 +34,6 @@ onMounted(() => {
       <div><RequestInput :parsed-rules="parsedRulesList" /></div>
       <div><AnimationStage v-show="requestMatched" /></div>
     </div>
-    <br-b />
   </main>
 </template>
 
