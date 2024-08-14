@@ -19,6 +19,9 @@ setTimeout(() => processRequest('schema-upgraded'), 10000);
 setTimeout(() => processRequest('headers-modified'), 13000);
 </script>
 
+
+<!-- Extension Template -->
+
 <template>
   <div class="animation-container">
     <div class="request" :class="requestAction" @animationend="resetRequest">
@@ -27,6 +30,13 @@ setTimeout(() => processRequest('headers-modified'), 13000);
     <div class="box">Extension</div>
   </div>
 </template>
+
+<script>
+  function displayExtensionRule(extensionRule) {
+    const heading = document.getElementsByClassName("box")[0]
+    heading.innerHTML = extensionRule
+  }
+</script>
 
 <style scoped>
 .animation-container {

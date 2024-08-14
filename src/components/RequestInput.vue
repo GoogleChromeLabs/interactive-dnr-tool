@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRulesStore } from '../stores/rulesStore';
 
+import { toRaw } from 'vue';
+
 const rulesStore = useRulesStore();
 
 const httpMethod = ref('GET');
@@ -9,6 +11,13 @@ const url = ref('');
 const headers = ref('');
 const body = ref('');
 const response = ref(null);
+
+
+function displayExtensionRule(extensionRule) {
+    const heading = document.getElementsByClassName("box")[0]
+    const target = toRaw(extensionRule)
+    heading.innerHTML = target.rule.action.type
+  }
 
 function submitRequest(ev) {
   ev.preventDefault();
@@ -19,11 +28,17 @@ function submitRequest(ev) {
     body: body.value
   };
   const matchedRule = rulesStore.requestMatcher(formObject)[0];
-  console.log(matchedRule);
-  httpMethod.value = 'GET';
-  url.value = '';
-  headers.value = '';
-  body.value = '';
+  if (matchedRule) {
+    console.log(matchedRule);
+    console.log(matchedRule.value);
+    displayExtensionRule(matchedRule)
+  } else {
+    alert("No rule matched")
+  }
+  // httpMethod.value = 'GET';
+  // url.value = '';
+  // headers.value = '';
+  // body.value = '';
 }
 </script>
 
