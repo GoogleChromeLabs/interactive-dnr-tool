@@ -19,6 +19,9 @@ setTimeout(() => processRequest('schema-upgraded'), 10000);
 setTimeout(() => processRequest('headers-modified'), 13000);
 </script>
 
+
+<!-- Extension Template -->
+
 <template>
   <div class="animation-container">
     <div class="request" :class="requestAction" @animationend="resetRequest">
@@ -27,6 +30,7 @@ setTimeout(() => processRequest('headers-modified'), 13000);
     <div class="box">Extension</div>
   </div>
 </template>
+
 
 <style scoped>
 .animation-container {
