@@ -30,7 +30,6 @@ function submitRequest(ev) {
   const matchedRule = rulesStore.requestMatcher(formObject)[0];
   if (matchedRule) {
     console.log(matchedRule);
-    console.log(matchedRule.value);
     displayExtensionRule(matchedRule)
   } else {
     alert("No rule matched")

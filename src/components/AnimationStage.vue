@@ -31,12 +31,6 @@ setTimeout(() => processRequest('headers-modified'), 13000);
   </div>
 </template>
 
-<script>
-  function displayExtensionRule(extensionRule) {
-    const heading = document.getElementsByClassName("box")[0]
-    heading.innerHTML = extensionRule
-  }
-</script>
 
 <style scoped>
 .animation-container {
