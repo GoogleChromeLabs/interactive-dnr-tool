@@ -2,8 +2,6 @@
 import { ref } from 'vue';
 import { useRulesStore } from '../stores/rulesStore';
 
-import { toRaw } from 'vue';
-
 const rulesStore = useRulesStore();
 
 const httpMethod = ref('GET');
@@ -11,33 +9,31 @@ const url = ref('');
 const headers = ref('');
 const body = ref('');
 const response = ref(null);
-
+const matchedRule = ref(null);
 
 function displayExtensionRule(extensionRule) {
-    const heading = document.getElementsByClassName("box")[0]
-    const target = toRaw(extensionRule)
-    heading.innerHTML = target.rule.action.type
-  }
+  matchedRule = toRaw(extensionRule);
+}
 
 function submitRequest(ev) {
   ev.preventDefault();
+
+  // Headers validity checking
+  let requestHeaders = {};
+  try {
+    requestHeaders = JSON.parse(headers.value);
+  } catch (e) {
+    window.alert('Invalid headers');
+    headers.value = '';
+    return;
+  }
+
   const formObject = {
     httpMethod: httpMethod.value,
     url: url.value,
-    headers: JSON.parse(headers.value || '{}'),
+    headers: JSON.parse(requestHeaders || '{}'),
     body: body.value
   };
-  const matchedRule = rulesStore.requestMatcher(formObject)[0];
-  if (matchedRule) {
-    console.log(matchedRule);
-    displayExtensionRule(matchedRule)
-  } else {
-    alert("No rule matched")
-  }
-  // httpMethod.value = 'GET';
-  // url.value = '';
-  // headers.value = '';
-  // body.value = '';
 }
 </script>
 
@@ -72,9 +68,9 @@ function submitRequest(ev) {
       </div>
       <button type="submit">Submit Request</button>
     </form>
-    <div v-if="response">
-      <h3>Response</h3>
-      <pre>{{ response }}</pre>
+    <div v-if="matchedRule">
+      <h2>Matched Rule</h2>
+      <!-- <pre>{{ matchedRule }}</pre> -->
     </div>
   </div>
 </template>
