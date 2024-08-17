@@ -142,19 +142,22 @@ export const useManifestStore = defineStore('manifest', {
 
       for (let field of Object.keys(otherFieldsAndTypes)) {
         if (Object.prototype.hasOwnProperty.call(manifest, field)) {
-          if (
-            otherFieldsAndTypes[field] === 'array' &&
-            !Array.isArray(manifest[field])
-          ) {
-            syntaxError.isError = true;
-            if (!syntaxError['type'].includes('invalidValueTypes')) {
-              syntaxError['type'].push('invalidValueTypes');
+          const expectedType = otherFieldsAndTypes[field];
+          const actualValue = manifest[field];
+          if (expectedType === 'array') {
+            if (!Array.isArray(actualValue)) {
+              syntaxError.isError = true;
+              if (!syntaxError['type'].includes('invalidValueTypes')) {
+                syntaxError['type'].push('invalidValueTypes');
+                syntaxError['invalidValueTypes'] = [];
+              }
+              syntaxError['invalidValueTypes'].push(field);
             }
-            syntaxError['invalidValueTypes'].push(field);
-          } else if (typeof manifest[field] !== otherFieldsAndTypes[field]) {
+          } else if (typeof actualValue !== expectedType) {
             syntaxError.isError = true;
             if (!syntaxError['type'].includes('invalidValueTypes')) {
               syntaxError['type'].push('invalidValueTypes');
+              syntaxError['invalidValueTypes'] = [];
             }
             syntaxError['invalidValueTypes'].push(field);
           }
