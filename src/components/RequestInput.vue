@@ -31,7 +31,7 @@ function submitRequest(ev) {
   const formObject = {
     httpMethod: httpMethod.value,
     url: url.value,
-    headers: JSON.parse(requestHeaders || '{}'),
+    headers: requestHeaders || {},
     body: body.value
   };
 }
