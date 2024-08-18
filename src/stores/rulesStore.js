@@ -49,12 +49,13 @@ export const useRulesStore = defineStore('rules', {
     }
   },
   actions: {
-    clearParsedRulesList() {
-      this.parsedRulesList = [];
-    },
     setRulesetFilesUploaded(value) {
       this.rulesetFilesUploaded = value;
     },
+    clearParsedRulesList() {
+      this.parsedRulesList = [];
+    },
+    // Return set of rules given the ruleset file name
     getRuleset(rulesetFileName) {
       if (!this.getParsedRulesList) {
         return [];
@@ -69,6 +70,7 @@ export const useRulesStore = defineStore('rules', {
       }
       return ruleset;
     },
+    // Update parsedRulesList with modified rule(s) of a given ruleset
     saveRuleset(rulesetFileName, ruleset) {
       let updatedRulesList = [];
       let processedRuleIds = new Set();
@@ -144,16 +146,15 @@ export const useRulesStore = defineStore('rules', {
       if (!Array.isArray(ruleset) || ruleset.length === 0) {
         return false;
       }
-
       // Validate each rule in the ruleset
       for (let rule of ruleset) {
         if (!this.isValidRule(rule)) {
           return false;
         }
       }
-
       return true;
     },
+    // Parse a given ruleset and set parsed rules list with each parsed rule
     setParsedRulesList(ruleset, fileName) {
       for (let rulesetFileInfoObjects of this.manifestStore.getRulesetFilePaths)
         if (rulesetFileInfoObjects.rulesetFilePath === fileName) {
@@ -175,6 +176,10 @@ export const useRulesStore = defineStore('rules', {
         }
       sortRules(this.parsedRulesList);
     },
+    clearParsedRulesList() {
+      this.parsedRulesList = [];
+    },
+    // Change the availability of a ruleset
     toggleRulesAvailability(rulesetFileName) {
       let updatedRulesList = [];
       for (let parsedRule of this.parsedRulesList) {
@@ -185,9 +190,7 @@ export const useRulesStore = defineStore('rules', {
       }
       this.parsedRulesList = updatedRulesList;
     },
-    clearParsedRulesList() {
-      this.parsedRulesList = [];
-    },
+    // Matches input HTTP request to parsed rule(s) and returns them
     requestMatcher(request) {
       let url = request.url;
       let matchedRules = [];

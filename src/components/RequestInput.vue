@@ -8,7 +8,6 @@ const httpMethod = ref('GET');
 const url = ref('');
 const headers = ref('');
 const body = ref('');
-const response = ref(null);
 const matchedRule = ref(null);
 
 function displayExtensionRule(extensionRule) {
@@ -31,9 +30,11 @@ function submitRequest(ev) {
   const formObject = {
     httpMethod: httpMethod.value,
     url: url.value,
-    headers: requestHeaders || {},
+    headers: requestHeaders || JSON.parse('{}'),
     body: body.value
   };
+  const matchedRule = rulesStore.requestMatcher(formObject)[0];
+  console.log(matchedRule);
 }
 </script>
 
