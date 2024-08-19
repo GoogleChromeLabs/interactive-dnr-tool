@@ -39,4 +39,14 @@ pre {
   font-family: monospace;
   color: white;
 }
+
+@media (prefers-color-scheme: light) {
+  pre {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: monospace;
+    color: black;
+  }
+}
 </style>
