@@ -212,7 +212,6 @@ export const useRulesStore = defineStore('rules', {
           matchedRules.push(this.parsedRulesList[i]);
         }
       }
-      // this.requestMatched = true;
       return matchedRules;
     }
   },
