@@ -8,22 +8,36 @@ const httpMethod = ref('GET');
 const url = ref('');
 const headers = ref('');
 const body = ref('');
-const response = ref(null);
+const matchedRule = ref(null);
+let matchedRuleString = '';
 
 function submitRequest(ev) {
   ev.preventDefault();
+
+  // Headers validity checking
+  let requestHeaders = {};
+  try {
+    requestHeaders = JSON.parse(headers.value || '{}');
+  } catch (e) {
+    window.alert('Invalid headers');
+    headers.value = '';
+    return;
+  }
+
   const formObject = {
     httpMethod: httpMethod.value,
     url: url.value,
-    headers: JSON.parse(headers.value || '{}'),
+    headers: requestHeaders,
     body: body.value
   };
-  const matchedRule = rulesStore.requestMatcher(formObject)[0];
-  console.log(matchedRule);
-  httpMethod.value = 'GET';
-  url.value = '';
-  headers.value = '';
-  body.value = '';
+  matchedRule.value = rulesStore.requestMatcher(formObject)[0];
+  // When matchedRule.value is undefined, it means no matching rule was found
+  try {
+    matchedRuleString = JSON.stringify(matchedRule.value.rule, null, 2);
+  } catch (e) {
+    window.alert('No matching rule found.');
+  }
+  rulesStore.setMatchedRuleString(matchedRuleString);
 }
 </script>
 
@@ -58,10 +72,6 @@ function submitRequest(ev) {
       </div>
       <button type="submit">Submit Request</button>
     </form>
-    <div v-if="response">
-      <h3>Response</h3>
-      <pre>{{ response }}</pre>
-    </div>
   </div>
 </template>
 
