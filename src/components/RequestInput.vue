@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRaw } from 'vue';
+import { ref } from 'vue';
 import { useRulesStore } from '../stores/rulesStore';
 
 const rulesStore = useRulesStore();
@@ -31,7 +31,7 @@ function submitRequest(ev) {
     body: body.value
   };
   matchedRule.value = rulesStore.requestMatcher(formObject)[0];
-  matchedRuleString = JSON.stringify(toRaw(matchedRule.value.rule), null, 2);
+  matchedRuleString = JSON.stringify(matchedRule.value.rule, null, 2);
   rulesStore.setMatchedRuleString(matchedRuleString);
 }
 </script>

@@ -9,7 +9,7 @@ const rulesStore = useRulesStore();
 const router = useRouter();
 const parsedRulesList = rulesStore.getParsedRulesList;
 // let requestMatched = computed(() => rulesStore.getRequestMatched);
-let matchedRuleStringSet = computed(() => rulesStore.getMatchedRuleStringSet);
+let matchedRuleString = computed(() => rulesStore.getMatchedRuleString);
 onMounted(() => {
   if (parsedRulesList.length === 0) {
     let result = confirm(
@@ -33,7 +33,7 @@ onMounted(() => {
     </div>
     <div class="flexbox">
       <div><RequestInput :parsed-rules="parsedRulesList" /></div>
-      <div><MatchedRuleBox v-if="matchedRuleStringSet" /></div>
+      <div><MatchedRuleBox v-if="matchedRuleString" /></div>
     </div>
   </main>
 </template>
