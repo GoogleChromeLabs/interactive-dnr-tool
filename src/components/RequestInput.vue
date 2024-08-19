@@ -17,7 +17,7 @@ function submitRequest(ev) {
   // Headers validity checking
   let requestHeaders = {};
   try {
-    requestHeaders = JSON.parse(headers.value);
+    requestHeaders = JSON.parse(headers.value || '{}');
   } catch (e) {
     window.alert('Invalid headers');
     headers.value = '';
@@ -27,11 +27,16 @@ function submitRequest(ev) {
   const formObject = {
     httpMethod: httpMethod.value,
     url: url.value,
-    headers: requestHeaders || JSON.parse('{}'),
+    headers: requestHeaders,
     body: body.value
   };
   matchedRule.value = rulesStore.requestMatcher(formObject)[0];
-  matchedRuleString = JSON.stringify(matchedRule.value.rule, null, 2);
+  // When matchedRule.value is undefined, it means no matching rule was found
+  try {
+    matchedRuleString = JSON.stringify(matchedRule.value.rule, null, 2);
+  } catch (e) {
+    window.alert('No matching rule found.');
+  }
   rulesStore.setMatchedRuleString(matchedRuleString);
 }
 </script>
