@@ -3,12 +3,13 @@ import { useRouter } from 'vue-router';
 import { useRulesStore } from '@/stores/rulesStore';
 import { computed, onMounted } from 'vue';
 import RequestInput from '@/components/RequestInput.vue';
-import AnimationStage from '@/components/AnimationStage.vue';
+import MatchedRuleBox from '@/components/MatchedRuleBox.vue';
 
 const rulesStore = useRulesStore();
 const router = useRouter();
 const parsedRulesList = rulesStore.getParsedRulesList;
-let requestMatched = computed(() => rulesStore.getRequestMatched);
+// let requestMatched = computed(() => rulesStore.getRequestMatched);
+let matchedRuleStringSet = computed(() => rulesStore.getMatchedRuleStringSet);
 onMounted(() => {
   if (parsedRulesList.length === 0) {
     let result = confirm(
@@ -32,7 +33,7 @@ onMounted(() => {
     </div>
     <div class="flexbox">
       <div><RequestInput :parsed-rules="parsedRulesList" /></div>
-      <div><AnimationStage v-show="requestMatched" /></div>
+      <div><MatchedRuleBox v-if="matchedRuleStringSet" /></div>
     </div>
   </main>
 </template>

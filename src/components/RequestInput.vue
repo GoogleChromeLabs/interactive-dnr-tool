@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, toRaw } from 'vue';
 import { useRulesStore } from '../stores/rulesStore';
 
 const rulesStore = useRulesStore();
@@ -9,10 +9,7 @@ const url = ref('');
 const headers = ref('');
 const body = ref('');
 const matchedRule = ref(null);
-
-function displayExtensionRule(extensionRule) {
-  matchedRule = toRaw(extensionRule);
-}
+let matchedRuleString = '';
 
 function submitRequest(ev) {
   ev.preventDefault();
@@ -33,8 +30,9 @@ function submitRequest(ev) {
     headers: requestHeaders || JSON.parse('{}'),
     body: body.value
   };
-  const matchedRule = rulesStore.requestMatcher(formObject)[0];
-  console.log(matchedRule);
+  matchedRule.value = rulesStore.requestMatcher(formObject)[0];
+  matchedRuleString = JSON.stringify(toRaw(matchedRule.value.rule), null, 2);
+  rulesStore.setMatchedRuleString(matchedRuleString);
 }
 </script>
 
@@ -69,10 +67,6 @@ function submitRequest(ev) {
       </div>
       <button type="submit">Submit Request</button>
     </form>
-    <div v-if="matchedRule">
-      <h2>Matched Rule</h2>
-      <!-- <pre>{{ matchedRule }}</pre> -->
-    </div>
   </div>
 </template>
 

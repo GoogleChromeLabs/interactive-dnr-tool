@@ -30,7 +30,8 @@ export const useRulesStore = defineStore('rules', {
     parsedRulesList: [],
     rulesetFilesUploaded: false,
     requestMatched: false,
-    matchedRule: {},
+    matchedRuleString: '',
+    matchedRuleStringSet: false,
     urlFilterStore: useURLFilterStore(),
     manifestStore: useManifestStore()
   }),
@@ -46,6 +47,12 @@ export const useRulesStore = defineStore('rules', {
     },
     getRulesetsList(state) {
       return state.rulesetsList;
+    },
+    getMatchedRuleString(state) {
+      return state.matchedRuleString;
+    },
+    getMatchedRuleStringSet(state) {
+      return state.matchedRuleStringSet;
     }
   },
   actions: {
@@ -54,6 +61,13 @@ export const useRulesStore = defineStore('rules', {
     },
     clearParsedRulesList() {
       this.parsedRulesList = [];
+    },
+    setMatchedRuleString(value) {
+      this.matchedRuleString = value;
+      this.matchedRuleStringSet = true;
+    },
+    setRequestMatched(value) {
+      this.requestMatched = value;
     },
     // Return set of rules given the ruleset file name
     getRuleset(rulesetFileName) {
@@ -203,7 +217,7 @@ export const useRulesStore = defineStore('rules', {
           matchedRules.push(this.parsedRulesList[i]);
         }
       }
-      this.requestMatched = true;
+      // this.requestMatched = true;
       return matchedRules;
     }
   },
