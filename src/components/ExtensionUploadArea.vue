@@ -12,7 +12,7 @@ let manifestFileName = ref('');
 let manifestFile = null;
 
 let rulesetFileNames = ref('');
-let rulesetFilesUploaded = false;
+let rulesetFilesUploaded = ref(false);
 
 function parseManifestFile(manifestFile) {
   const reader = new FileReader();
@@ -50,12 +50,18 @@ function parseManifestFile(manifestFile) {
   reader.readAsText(manifestFile);
 }
 
-function manifestDropHandler(ev) {
+function manifestInputHandler(ev) {
   ev.preventDefault();
   let numFiles = 0;
+  let files = [];
+  try {
+    files = ev.dataTransfer.items;
+  } catch (e) {
+    files = ev.target.files;
+  }
 
-  if (ev.dataTransfer.items) {
-    numFiles = ev.dataTransfer.items.length;
+  if (files.length != 0) {
+    numFiles = files.length;
     if (numFiles === 0) {
       window.alert('No files were dropped');
       return;
@@ -64,12 +70,15 @@ function manifestDropHandler(ev) {
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      if (ev.dataTransfer.items[i].kind === 'file') {
-        manifestFile = ev.dataTransfer.items[i].getAsFile();
+      if (files[i].kind === 'file') {
+        manifestFile = files[i].getAsFile();
+      } else {
+        manifestFile = files[i];
       }
     }
   } else {
-    numFiles = ev.dataTransfer.files.length;
+    files = ev.dataTransfer.files;
+    numFiles = files.length;
     if (numFiles === 0) {
       window.alert('No files were dropped');
       return;
@@ -78,7 +87,7 @@ function manifestDropHandler(ev) {
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      manifestFile = ev.dataTransfer.files[i];
+      manifestFile = files[i];
     }
   }
   parseManifestFile(manifestFile);
@@ -119,31 +128,40 @@ function parseRulesetFile(rulesetFile) {
   reader.readAsText(rulesetFile);
 }
 
-function rulesetFilesDropHandler(ev) {
+function rulesetFilesInputHandler(ev) {
   ev.preventDefault();
   let numFiles = 0;
 
   let rulesetFiles = [];
 
-  if (ev.dataTransfer.items) {
-    numFiles = ev.dataTransfer.items.length;
+  try {
+    rulesetFiles = ev.dataTransfer.items;
+  } catch (e) {
+    rulesetFiles = Array.from(ev.target.files);
+  }
+
+  if (rulesetFiles.length != 0) {
+    numFiles = rulesetFiles.length;
     if (numFiles < 1) {
       window.alert('One or more files expected');
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      if (ev.dataTransfer.items[i].kind === 'file') {
-        rulesetFiles.push(ev.dataTransfer.items[i].getAsFile());
+      if (rulesetFiles[i].kind === 'file') {
+        rulesetFiles.push(rulesetFiles[i].getAsFile());
+      } else {
+        rulesetFiles.push(rulesetFiles[i]);
       }
     }
   } else {
-    numFiles = ev.dataTransfer.files.length;
+    rulesetFiles = ev.dataTransfer.files;
+    numFiles = rulesetFiles.length;
     if (numFiles === 0) {
       window.alert('One or more files expected');
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      rulesetFiles.push(ev.dataTransfer.files[i]);
+      rulesetFiles.push(rulesetFiles[i]);
     }
   }
   rulesetFileNames.value = rulesetFiles.map((file) => file.name).join(', ');
@@ -160,8 +178,15 @@ function dragOverHandler(ev) {
 }
 
 function removeDragData(ev) {
-  if (ev.dataTransfer.items) {
-    ev.dataTransfer.items.clear();
+  try {
+    if (ev.dataTransfer.items) {
+      ev.dataTransfer.items.clear();
+    } else {
+      ev.target.value = ''; // Clear the file input element
+    }
+  } catch (e) {
+    document.getElementById('manifest_file_input').value = '';
+    document.getElementById('ruleset_files_input').value = '';
   }
 }
 </script>
@@ -173,15 +198,24 @@ function removeDragData(ev) {
       <ExtensionIcon />
     </template>
     <template #heading>Upload Manifest</template>
-    <div
-      class="drop_zone"
-      id="manifest_drop_zone"
-      @drop="manifestDropHandler"
-      @dragover="dragOverHandler"
-    >
-      <p v-if="!manifestFileName">Drag manifest.json file ...</p>
-      <p v-else>{{ manifestFileName }}</p>
-    </div>
+    <label class="drop-zone-label">
+      <div
+        class="drop_zone"
+        id="manifest_drop_zone"
+        @drop="manifestInputHandler"
+        @dragover="dragOverHandler"
+      >
+        <p v-if="!manifestFileName">
+          Drag manifest.json file, or click to browse ...
+        </p>
+        <p v-else>{{ manifestFileName }}</p>
+        <input
+          type="file"
+          id="manifest_file_input"
+          @change="manifestInputHandler"
+        />
+      </div>
+    </label>
   </FileUploadHeading>
   <br />
   <FileUploadHeading v-show="manifestFileName">
@@ -189,15 +223,25 @@ function removeDragData(ev) {
       <ExtensionIcon />
     </template>
     <template #heading>Upload Ruleset Files</template>
-    <div
-      class="drop_zone"
-      id="ruleset_drop_zone"
-      @drop="rulesetFilesDropHandler"
-      @dragover="dragOverHandler"
-    >
-      <p v-if="rulesetFileNames === ''">Drag one or more ruleset files ...</p>
-      <p v-else>{{ rulesetFileNames }}</p>
-    </div>
+    <label class="drop-zone-label">
+      <div
+        class="drop_zone"
+        id="ruleset_drop_zone"
+        @drop="rulesetFilesInputHandler"
+        @dragover="dragOverHandler"
+      >
+        <p v-if="rulesetFileNames === ''">
+          Drag one or more ruleset files, or click to browse...
+        </p>
+        <p v-else>{{ rulesetFileNames }}</p>
+        <input
+          type="file"
+          id="ruleset_files_input"
+          @change="rulesetFilesInputHandler"
+          multiple
+        />
+      </div>
+    </label>
   </FileUploadHeading>
 </template>
 
@@ -206,5 +250,8 @@ function removeDragData(ev) {
   border: dashed;
   width: 200px;
   height: 100px;
+}
+input[type='file'] {
+  display: none;
 }
 </style>
