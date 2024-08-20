@@ -131,37 +131,37 @@ function parseRulesetFile(rulesetFile) {
 function rulesetFilesInputHandler(ev) {
   ev.preventDefault();
   let numFiles = 0;
-
+  let tempRulesetFiles = [];
   let rulesetFiles = [];
 
-  try {
-    rulesetFiles = ev.dataTransfer.items;
-  } catch (e) {
-    rulesetFiles = Array.from(ev.target.files);
+  if (ev.dataTransfer) {
+    tempRulesetFiles = ev.dataTransfer.items;
+  } else {
+    tempRulesetFiles = Array.from(ev.target.files);
   }
 
-  if (rulesetFiles.length != 0) {
-    numFiles = rulesetFiles.length;
+  if (tempRulesetFiles.length != 0) {
+    numFiles = tempRulesetFiles.length;
     if (numFiles < 1) {
       window.alert('One or more files expected');
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      if (rulesetFiles[i].kind === 'file') {
-        rulesetFiles.push(rulesetFiles[i].getAsFile());
+      if (tempRulesetFiles[i].kind === 'file') {
+        rulesetFiles.push(tempRulesetFiles[i].getAsFile());
       } else {
-        rulesetFiles.push(rulesetFiles[i]);
+        rulesetFiles.push(tempRulesetFiles[i]);
       }
     }
   } else {
-    rulesetFiles = ev.dataTransfer.files;
-    numFiles = rulesetFiles.length;
+    tempRulesetFiles = ev.dataTransfer.files;
+    numFiles = tempRulesetFiles.length;
     if (numFiles === 0) {
       window.alert('One or more files expected');
       return;
     }
     for (let i = 0; i < numFiles; i++) {
-      rulesetFiles.push(rulesetFiles[i]);
+      rulesetFiles.push(tempRulesetFiles[i]);
     }
   }
   rulesetFileNames.value = rulesetFiles.map((file) => file.name).join(', ');
