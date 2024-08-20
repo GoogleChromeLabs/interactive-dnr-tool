@@ -54,9 +54,13 @@ function manifestInputHandler(ev) {
   ev.preventDefault();
   let numFiles = 0;
   let files = [];
-  try {
+
+  // Check if the file was dropped or selected from the file input
+  if (ev.dataTransfer.items) {
+    // Dropped file
     files = ev.dataTransfer.items;
-  } catch (e) {
+  } else {
+    // Selected from file input
     files = ev.target.files;
   }
 
@@ -134,9 +138,12 @@ function rulesetFilesInputHandler(ev) {
   let tempRulesetFiles = [];
   let rulesetFiles = [];
 
-  if (ev.dataTransfer) {
+  // Check if the files were dropped or selected from the file input
+  if (ev.dataTransfer.items) {
+    // Dropped files
     tempRulesetFiles = ev.dataTransfer.items;
   } else {
+    // Selected from file input
     tempRulesetFiles = Array.from(ev.target.files);
   }
 
