@@ -56,7 +56,7 @@ function manifestInputHandler(ev) {
   let files = [];
 
   // Check if the file was dropped or selected from the file input
-  if (ev.dataTransfer.items) {
+  if (ev.dataTransfer) {
     // Dropped file
     files = ev.dataTransfer.items;
   } else {
@@ -139,7 +139,7 @@ function rulesetFilesInputHandler(ev) {
   let rulesetFiles = [];
 
   // Check if the files were dropped or selected from the file input
-  if (ev.dataTransfer.items) {
+  if (ev.dataTransfer) {
     // Dropped files
     tempRulesetFiles = ev.dataTransfer.items;
   } else {
@@ -186,7 +186,7 @@ function dragOverHandler(ev) {
 
 function removeDragData(ev) {
   try {
-    if (ev.dataTransfer.items) {
+    if (ev.dataTransfer) {
       ev.dataTransfer.items.clear();
     } else {
       ev.target.value = ''; // Clear the file input element
