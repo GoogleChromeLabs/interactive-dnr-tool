@@ -4,8 +4,12 @@ import { useRouter } from 'vue-router';
 import { useRulesStore } from '@/stores/rulesStore';
 import LandingDescription from '../components/LandingDescription.vue';
 import ExtensionUploadArea from '../components/ExtensionUploadArea.vue';
+import OverlayCard from '@/components/OverlayCard.vue';
+import { useManifestStore } from '@/stores/manifestStore';
 const rulesStore = useRulesStore();
+const manifestStore = useManifestStore();
 let filesUploaded = computed(() => rulesStore.parsedRulesList.length > 0);
+let isFirstVisit = computed(() => manifestStore.isFirstVisit);
 
 const router = useRouter();
 
@@ -18,6 +22,7 @@ function goToRequests() {
 
 <template>
   <main>
+    <OverlayCard v-show="isFirstVisit" />
     <header>
       <div class="left-section">
         <img

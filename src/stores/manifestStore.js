@@ -11,7 +11,8 @@ export const useManifestStore = defineStore('manifest', {
       isEnabled: true | false
     }
     */
-    rulesetFilePaths: []
+    rulesetFilePaths: [],
+    isFirstVisit: true
   }),
   getters: {
     getRulesetFilePaths(state) {
@@ -19,6 +20,9 @@ export const useManifestStore = defineStore('manifest', {
     }
   },
   actions: {
+    setIsFirstVisit(value) {
+      this.isFirstVisit = value;
+    },
     clearRulesetFilePaths() {
       this.rulesetFilePaths = [];
     },
@@ -193,6 +197,6 @@ export const useManifestStore = defineStore('manifest', {
   },
   persist: {
     storage: sessionStorage,
-    paths: ['rulesetFilePaths']
+    paths: ['rulesetFilePaths', 'isFirstVisit']
   }
 });
