@@ -5,7 +5,7 @@ import { useRulesStore } from '@/stores/rulesStore';
 import LandingDescription from '../components/LandingDescription.vue';
 import ExtensionUploadArea from '../components/ExtensionUploadArea.vue';
 const rulesStore = useRulesStore();
-let filesUploaded = computed(() => rulesStore.rulesetFilesUploaded);
+let filesUploaded = computed(() => rulesStore.parsedRulesList.length > 0);
 
 const router = useRouter();
 

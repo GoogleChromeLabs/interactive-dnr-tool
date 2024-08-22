@@ -12,7 +12,6 @@ let manifestFileName = ref('');
 let manifestFile = null;
 
 let rulesetFileNames = ref('');
-let rulesetFilesUploaded = ref(false);
 
 function parseManifestFile(manifestFile) {
   const reader = new FileReader();
@@ -175,8 +174,6 @@ function rulesetFilesInputHandler(ev) {
   for (let i = 0; i < rulesetFiles.length; i++) {
     parseRulesetFile(rulesetFiles[i]);
   }
-  rulesetFilesUploaded = true;
-  rulesStore.setRulesetFilesUploaded(rulesetFilesUploaded);
   removeDragData(ev);
 }
 
