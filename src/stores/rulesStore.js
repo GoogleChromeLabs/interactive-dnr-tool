@@ -28,7 +28,6 @@ export const useRulesStore = defineStore('rules', {
     }
     */
     parsedRulesList: [],
-    rulesetFilesUploaded: false,
     requestMatched: false,
     matchedRuleString: '',
     urlFilterStore: useURLFilterStore(),
@@ -37,9 +36,6 @@ export const useRulesStore = defineStore('rules', {
   getters: {
     getParsedRulesList(state) {
       return state.parsedRulesList;
-    },
-    getRulesetFilesUploaded(state) {
-      return state.rulesetFilesUploaded;
     },
     getRequestMatched(state) {
       return state.requestMatched;
@@ -52,9 +48,6 @@ export const useRulesStore = defineStore('rules', {
     }
   },
   actions: {
-    setRulesetFilesUploaded(value) {
-      this.rulesetFilesUploaded = value;
-    },
     clearParsedRulesList() {
       this.parsedRulesList = [];
     },
