@@ -45,6 +45,9 @@ export const useRulesStore = defineStore('rules', {
     },
     getMatchedRuleString(state) {
       return state.matchedRuleString;
+    },
+    getParsedRulesListLength(state) {
+      return state.parsedRulesList.length;
     }
   },
   actions: {

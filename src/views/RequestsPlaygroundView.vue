@@ -7,11 +7,10 @@ import MatchedRuleBox from '@/components/MatchedRuleBox.vue';
 
 const rulesStore = useRulesStore();
 const router = useRouter();
-const parsedRulesList = rulesStore.getParsedRulesList;
-// let requestMatched = computed(() => rulesStore.getRequestMatched);
+const parsedRulesList = rulesStore.getParsedRulesListLength;
 let matchedRuleString = computed(() => rulesStore.getMatchedRuleString);
 onMounted(() => {
-  if (parsedRulesList.length === 0) {
+  if (parsedRulesList === 0) {
     let result = confirm(
       '0 parsed rules found. Proceed to upload ruleset file(s)?'
     );
