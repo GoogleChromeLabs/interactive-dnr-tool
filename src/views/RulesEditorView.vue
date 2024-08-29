@@ -1,6 +1,24 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import 'jsoneditor/dist/jsoneditor.css';
 import JSONRulesEditor from '@/components/JSONRulesEditor.vue';
+import { useRulesStore } from '@/stores/rulesStore';
+import { onMounted } from 'vue';
+
+const rulesStore = useRulesStore();
+const parsedRulesList = rulesStore.getParsedRulesListLength;
+
+const router = useRouter();
+onMounted(() => {
+  if (parsedRulesList === 0) {
+    let result = confirm(
+      '0 parsed rules found. Proceed to upload ruleset file(s)?'
+    );
+    if (result) {
+      router.push({ name: 'home' });
+    }
+  }
+});
 </script>
 
 <template>
